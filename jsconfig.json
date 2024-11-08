@@ -1,0 +1,10 @@
+// jsconfig.json
+{
+    "compilerOptions": {
+        "baseUrl": "./",
+        "paths": {
+            "~/*": ["app/*"]
+        }
+    },
+    "include": ["app/**/*"]
+}
