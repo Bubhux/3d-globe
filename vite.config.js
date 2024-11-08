@@ -21,6 +21,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
+            '~': resolve(__dirname, 'app'),
             '~app': resolve(__dirname, 'app'),
             '~static': resolve(__dirname, 'static'),
         },
