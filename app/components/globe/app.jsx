@@ -1,22 +1,23 @@
 // app/components/globe/app.jsx
-import React, { Component } from 'react';
 import * as THREE from 'three';
+import React, { Component } from 'react';
 import OrbitControls from 'three-orbitcontrols';
 import Stats from 'stats.js';
 import dat from 'dat.gui';
 
 
 class App extends Component {
-    constructor({ animate, setup, preload }) {
-        super();
-        this.preload = preload;
-        this.animate = animate;
-        this.setup = setup;
+    constructor(props) {
+        super(props);
+        this.preload = props.preload;
+        this.animate = props.animate;
+        this.setup = props.setup;
         this.stats = null;
         this.renderer = null;
         this.scene = null;
         this.camera = null;
         this.controls = null;
+        this.cancelAnimationFrameId = null;
         window.app = this;
     }
 
@@ -27,11 +28,15 @@ class App extends Component {
         this.initControls();
         this.initStats();
 
-        if (this.preload) {
-            await this.preload();
+        try {
+            if (this.preload) {
+                await this.preload();
+            }
+        } catch (error) {
+            console.error("Error during preload:", error);
         }
 
-        this.render();
+        this.initRender();
         this.update();
 
         window.addEventListener('resize', this.handleResize);
@@ -39,7 +44,13 @@ class App extends Component {
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.handleResize);
-        cancelAnimationFrame(this.update);
+        if (this.cancelAnimationFrameId) {
+            cancelAnimationFrame(this.cancelAnimationFrameId);
+        }
+
+        if (this.renderer) {
+            this.renderer.dispose();
+        }
     }
 
     initScene = () => {
@@ -77,7 +88,7 @@ class App extends Component {
         document.body.appendChild(this.stats.domElement);
     }
 
-    render = () => {
+    initRender = () => {
         this.setup(this);
     }
 
@@ -86,7 +97,7 @@ class App extends Component {
         this.stats.update();
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
-        requestAnimationFrame(this.update);
+        this.cancelAnimationFrameId = requestAnimationFrame(this.update);
     }
 
     addControlGui = callback => {
