@@ -1,36 +1,8 @@
 // app/components/globe/dots.jsx
-import React, { useEffect } from 'react';
 import * as THREE from 'three';
-import { config, elements, groups, countries } from '~/components/globe/utils/config';
+import React, { useEffect, useRef } from 'react';
+import { config, groups, countries } from '~/components/globe/utils/config';
 
-
-const Dots = () => {
-    const total = config.dots.total;
-
-    useEffect(() => {
-        groups.lineDots = new THREE.Group();
-        groups.lineDots.name = 'LineDots';
-
-        createDots();
-
-        return () => {
-            // Nettoyage si nécessaire, par exemple, retirer les points du groupe ou de la scène
-            if (groups.lineDots.parent) {
-                groups.lineDots.parent.remove(groups.lineDots);
-            }
-        };
-    }, []);
-
-    const createDots = () => {
-        for (let i = 0; i < total; i++) {
-            const dot = new Dot();
-            groups.lineDots.add(dot.mesh);
-            elements.lineDots.push(dot);
-        }
-    };
-
-    return null; // Le rendu se fait avec Three.js, rien à afficher ici
-};
 
 class Dot {
     constructor() {
@@ -79,5 +51,42 @@ class Dot {
         }
     }
 }
+
+const Dots = ({ scene }) => {
+    const total = config.dots.total;
+    const frameId = useRef();
+
+    useEffect(() => {
+        groups.lineDots = new THREE.Group();
+        groups.lineDots.name = 'LineDots';
+        scene.add(groups.lineDots);
+
+        createDots();
+
+        const animate = () => {
+            groups.lineDots.children.forEach(dot => dot.animate());
+            frameId.current = requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        return () => {
+            if (groups.lineDots.parent) {
+                groups.lineDots.parent.remove(groups.lineDots);
+            }
+            cancelAnimationFrame(frameId.current);
+        };
+    }, [scene]);
+
+    const createDots = () => {
+        for (let i = 0; i < total; i++) {
+            const dot = new Dot();
+            groups.lineDots.add(dot.mesh);
+            elements.lineDots.push(dot);
+        }
+    };
+
+    return null; // Le rendu se fait avec Three.js, rien à afficher ici
+};
 
 export default Dots;

@@ -1,8 +1,8 @@
 // app/components/globe/utils/config.js
 export const config = {
 	urls: {
-		globeTexture: '../assets/textures/earth_dark.jpg',
-		pointTexture: '../assets/imgs/disc.png'
+		globeTexture: './textures/earth_dark.jpg',
+		pointTexture: './img/disc.png'
 	},
 	sizes: {
 		globe: 200,
@@ -46,6 +46,10 @@ export const elements = {
 	markerPoint: [],
 	lines: []
 };
+
+export const textures = {
+	markerLabels: []
+}
 
 export const groups = {
 	map: null,

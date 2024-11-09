@@ -1,12 +1,13 @@
 // app/components/globe/globe.jsx
 import * as THREE from 'three';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { shaders } from '~/components/globe/utils/shaders';
 import { config, elements, groups } from '~/components/globe/utils/config';
 
 
-const Globe = ({ isLoading, setIsLoading }) => { // Récupére les props
+const Globe = ({ isLoading, setIsLoading, loader }) => {
     const radius = config.sizes.globe;
+    const globeRef = useRef(null);
 
     useEffect(() => {
         const geometry = new THREE.SphereGeometry(radius, 64, 64);
@@ -16,7 +17,7 @@ const Globe = ({ isLoading, setIsLoading }) => { // Récupére les props
         groups.globe.name = 'Globe';
 
         initGlobe(geometry);
-        // Initialiser l'atmosphère ici si nécessaire
+        initAtmosphere();
 
         return () => {
             // Nettoyage si nécessaire
@@ -24,11 +25,11 @@ const Globe = ({ isLoading, setIsLoading }) => { // Récupére les props
                 groups.globe.parent.remove(groups.globe);
             }
         };
-    }, [radius]);
+    }, [radius, loader, setIsLoading]);
 
     const initGlobe = (geometry) => {
         const scale = config.scale.globeScale;
-        const globeMaterial = createGlobeMaterial(); // Utilise le matériel
+        const globeMaterial = createGlobeMaterial();
         const globe = new THREE.Mesh(geometry, globeMaterial);
         globe.scale.set(scale, scale, scale);
         elements.globe = globe;
@@ -56,9 +57,8 @@ const Globe = ({ isLoading, setIsLoading }) => { // Récupére les props
     };
 
     const createGlobeMaterial = () => {
-        const loader = new THREE.TextureLoader(); // Instancie le loader ici
-        const texture = loader.load('null', () => {
-            setIsLoading(false); // Appele setIsLoading une fois la texture chargée
+        const texture = loader.load(config.urls.globeTexture, () => {
+            setIsLoading(false);
         }, undefined, (error) => {
             console.error('Erreur de chargement de la texture', error);
         });
@@ -83,7 +83,11 @@ const Globe = ({ isLoading, setIsLoading }) => { // Récupére les props
         });
     };
 
-    return null; // Le rendu se fait avec Three.js, rien à afficher ici
+    return (
+        <div ref={globeRef}>
+            {isLoading && <p>Loading...</p>}
+        </div>
+    );
 };
 
 export default Globe;

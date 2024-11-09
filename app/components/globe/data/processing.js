@@ -1,5 +1,5 @@
 // Select countries
-const SouthAmerica = [
+export const SouthAmerica = [
     'Ecuador',
     'Colombia',
     'Paraguay',
@@ -11,14 +11,14 @@ const SouthAmerica = [
     'Cuba'
 ];
 
-const NorthAmerica = [
+export const NorthAmerica = [
     'Mexico',
     'United States',
     'Greenland',
     'Iceland'
 ]
 
-const Europe = [
+export const Europe = [
     'Norway',
     'Greece',
     'Serbia',
@@ -32,7 +32,7 @@ const Europe = [
     'Romania'
 ]
 
-const Africa = [
+export const Africa = [
     'Chad',
     'Nigeria',
     'Namibia',
@@ -49,7 +49,7 @@ const Africa = [
     'Sudan'
 ];
 
-const Asia = [
+export const Asia = [
     'Pakistan',
     'India',
     'Nepal',
@@ -65,7 +65,7 @@ const Asia = [
     'Indonesia'
 ]
 
-const Rest = [
+export const Rest = [
     'New Caledonia',
     'New Zealand',
     'Tonga',
@@ -76,7 +76,7 @@ const Rest = [
     'Tuvalu'
 ]
 
-const selected = [
+export const selected = [
     ...Asia,
     ...Africa,
     ...Europe,
@@ -86,7 +86,7 @@ const selected = [
 ]
 
 
-function selectCountries(list, countries) {
+export function selectCountries(list, countries) {
     return list.map(name => {
         const country = countries.find(c => c.name === name);
         const { latitude, longitude } = country;
@@ -96,7 +96,7 @@ function selectCountries(list, countries) {
 
 
 // Connections
-const connections = {
+export const connections = {
     'Colombia': ['Ecuador', 'Cuba', 'Mexico', 'Peru', 'Venezuela, RB', 'Guyana', 'United States'],
     'South Sudan': ['Nigeria', 'Sudan', 'Kenya', 'Uganda', 'Zambia', 'Malawi', 'Ethiopia', 'Somalia', 'Madagascar', 'Yemen, Rep.'],
     'India': ['Pakistan', 'Kazakhstan', 'Maldives', 'Sri Lanka', 'Vietnam', 'Thailand'],
@@ -106,11 +106,11 @@ const connections = {
 }
 
 
-function getCountry(name, countries) {
+export function getCountry(name, countries) {
     return countries.find(c => c.name === name);
 }
 
-function getCountries(object, countries) {
+export function getCountries(object, countries) {
     return Object.keys(object).reduce((r, e) => {
         r[e] = object[e].map(c => getCountry(c, countries))
         return r;

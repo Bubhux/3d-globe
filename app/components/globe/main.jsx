@@ -1,18 +1,24 @@
 // app/components/globe/main.jsx
-import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import React, { useEffect, useRef, useState } from 'react';
+
+import App from './app';
 import Globe from './globe';
-import Lines from './Lines'; // Importez votre classe Lines
-import Markers from './Markers'; // Importez votre classe Markers
-import Points from './Points'; // Importez votre classe Points
+import Lines from './lines';
+import Markers from './markers';
+import Points from './points';
+
+import { getCountries } from '~/components/globe/data/processing';
+import { config, elements, groups, animations } from '~/components/globe/utils/config';
 
 
 const Main = () => {
     const [controls, setControls] = useState({});
-    const [data, setData] = useState({});
+    const [loadedData, setLoadedData] = useState({});
     const [isLoading, setIsLoading] = useState(true); // Nouvel état pour le chargement
     const appRef = useRef(null);
-    
+    const loader = new THREE.TextureLoader();
+
     useEffect(() => {
         const app = new App({ setup, animate, preload });
         appRef.current = app;
@@ -34,25 +40,36 @@ const Main = () => {
         };
     }, []);
 
+    useEffect(() => {
+        // Import dynamique du script
+        const script = document.createElement('script');
+        script.src = "~/components/globe/libs/perlin-noise.js";
+        script.async = true;
+        document.body.appendChild(script);
+
+        return () => {
+            // Cleanup : suppression du script quand le composant est démonté
+            document.body.removeChild(script);
+        };
+    }, []);
+
     const preload = async () => {
         try {
             // Vous pouvez décommenter et utiliser ces lignes selon vos besoins
+            // Chargement des données
             // const gridUrl = '../assets/data/grid.json';
             // const gridRes = await fetch(gridUrl);
-            // const grid = await gridRes.json();
-            // data.grid = grid;
+            // loadedData.grid = await gridRes.json();
 
             // const countryUrl = '../assets/data/countries.json';
             // const countryRes = await fetch(countryUrl);
-            // const countries = await countryRes.json();
-            // data.countries = countries;
+            // loadedData.countries = await countryRes.json();
 
             // const connectionsUrl = '../assets/data/connections.json';
             // const connectionsRes = await fetch(connectionsUrl);
-            // const connections = await connectionsRes.json();
-            // data.connections = getCountries(connections, countries);    
+            // loadedData.connections = getCountries(await connectionsRes.json(), loadedData.countries);    
 
-            setData(data); // Met à jour l'état avec les données chargées
+            setLoadedData(loadedData); // Met à jour l'état avec les données chargées
             return true;
         } catch (error) {
             console.log(error);
@@ -98,7 +115,10 @@ const Main = () => {
         app.controls.dampingFactor = 0.05;
         app.controls.rotateSpeed = 0.07;
 
-        const groups = { main: new THREE.Group() };
+        const groups = {
+            main: new THREE.Group(),
+            globe: new THREE.Group()
+        };
         groups.main.name = 'Main';
 
         const globe = new Globe();
@@ -176,9 +196,11 @@ const Main = () => {
     };
 
     useEffect(() => {
-        // Appeler animate sur chaque frame avec une méthode comme requestAnimationFrame
+        // Appel animate sur chaque frame avec une méthode comme requestAnimationFrame
         const animateLoop = () => {
-            animate(appRef.current);
+            if (appRef.current) {
+                animate(appRef.current);
+            }
             requestAnimationFrame(animateLoop);
         };
 
@@ -194,8 +216,15 @@ const Main = () => {
         return <div>Loading...</div>; // Affiche un loader pendant le chargement
     }
 
+    if (data.error) {
+        return <div>Error loading data: {data.error.message}</div>; // Affiche une erreur si le chargement échoue
+    }
+
     return (
-        <div id="canvas-container"></div>
+        <div id="canvas-container">
+            <canvas ref={appRef}></canvas>
+            <Globe loader={loader} />
+        </div>
     );
 };
 
