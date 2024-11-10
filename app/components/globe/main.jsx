@@ -10,6 +10,7 @@ import Points from './points';
 
 import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
+import "./main.module.css"
 
 
 const Main = () => {
@@ -221,11 +222,21 @@ const Main = () => {
     }
 
     return (
-        <div id="canvas-container">
-            <canvas ref={appRef}></canvas>
-            <Globe loader={loader} />
-        </div>
-    );
+        <body>
+            <div className="app-wrapper">
+                <canvas ref={appRef}></canvas>
+                <Globe loader={loader} />
+                <Markers data={loadedData.countries} />
+                <Lines data={loadedData.connections} />
+                <Points data={loadedData.grid} />
+                <ul className="markers">
+                    {loadedData.countries && loadedData.countries.map((country, index) => (
+                        <li key={index} className="marker">{country.name}</li>
+                    ))}
+                </ul>
+            </div>
+        </body>
+    );   
 };
 
 export default Main;

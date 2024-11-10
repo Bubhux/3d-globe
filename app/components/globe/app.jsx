@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import React, { Component } from 'react';
 import OrbitControls from 'three-orbitcontrols';
 import Stats from 'stats.js';
-import dat from 'dat.gui';
 
 
 class App extends Component {
@@ -22,6 +21,11 @@ class App extends Component {
     }
 
     async componentDidMount() {
+        // Importation conditionnelle de dat.gui
+        if (typeof window !== 'undefined') {
+            dat = await import('dat.gui'); // Importe uniquement côté client
+        }
+
         this.initScene();
         this.initRenderer();
         this.initCamera();

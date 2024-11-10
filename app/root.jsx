@@ -1,6 +1,6 @@
 // app/root.jsx
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
-import "./tailwind.css";
+//import "./tailwind.css";
 
 
 export const links = () => [

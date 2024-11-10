@@ -4,7 +4,6 @@ import React, { useEffect } from 'react';
 import { toSphereCoordinates } from './utils/utils';
 import { config, groups, elements } from '~/components/globe/utils/config';
 
-import { toSphereCoordinates } from './utils/utils';
 import Marker from './Marker';
 
 
