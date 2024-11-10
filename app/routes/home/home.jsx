@@ -1,7 +1,9 @@
 // app/routes/home/home.jsx
 import * as RemixNode from '@remix-run/node';
+import React, { Suspense, lazy } from 'react';
 
 
+const Main = lazy(() => import('~/components/globe/main'));
 const { meta: remixMeta } = RemixNode;
 
 export const meta = () => {
@@ -17,21 +19,12 @@ export default function Home() {
             <div className="flex flex-col items-center gap-16">
                 <header className="flex flex-col items-center gap-9">
                     <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
-                        Welcome to <span className="sr-only">Remix</span>
+                        Welcome
                     </h1>
-                    <div className="h-[144px] w-[434px]">
-                        <img
-                            src="/logo-light.png"
-                            alt="Remix"
-                            className="block w-full dark:hidden"
-                        />
-                        <img
-                            src="/logo-dark.png"
-                            alt="Remix"
-                            className="hidden w-full dark:block"
-                        />
-                    </div>
                 </header>
+                <Suspense fallback={<div>Loading Globe...</div>}>
+                    <Main />
+                </Suspense>
             </div>
         </div>
     );
