@@ -14,6 +14,7 @@ import "./main.module.css"
 
 
 const Main = () => {
+    console.log("Main component loaded");
     const [controls, setControls] = useState({});
     const [loadedData, setLoadedData] = useState({});
     const [isLoading, setIsLoading] = useState(true); // Nouvel état pour le chargement
@@ -21,12 +22,15 @@ const Main = () => {
     const loader = new THREE.TextureLoader();
 
     useEffect(() => {
+        console.log("App initialized");
         const app = new App({ setup, animate, preload });
         appRef.current = app;
 
         const loadData = async () => {
+            console.log("Loading data...");
             await preload(); // Charge les données
             setup(appRef.current); // Configure après le chargement
+            console.log("Data loaded and setup completed");
             setIsLoading(false); // Indique que le chargement est terminé
         };
 
@@ -56,28 +60,31 @@ const Main = () => {
 
     const preload = async () => {
         try {
+            console.log("Preloading data...");
             // Vous pouvez décommenter et utiliser ces lignes selon vos besoins
             // Chargement des données
-            // const gridUrl = '../assets/data/grid.json';
+            // const gridUrl = '~/components/globe/data/grid.js';
             // const gridRes = await fetch(gridUrl);
             // loadedData.grid = await gridRes.json();
 
-            // const countryUrl = '../assets/data/countries.json';
+            // const countryUrl = '~/components/globe/data/countries.js';
             // const countryRes = await fetch(countryUrl);
             // loadedData.countries = await countryRes.json();
 
-            // const connectionsUrl = '../assets/data/connections.json';
+            // const connectionsUrl = '~/components/globe/data/connections.js';
             // const connectionsRes = await fetch(connectionsUrl);
             // loadedData.connections = getCountries(await connectionsRes.json(), loadedData.countries);    
 
             setLoadedData(loadedData); // Met à jour l'état avec les données chargées
+            console.log("Preloading completed successfully", loadedData);
             return true;
         } catch (error) {
-            console.log(error);
+            console.error("Error during preloading:", error);
         }
     };
 
     const setup = (app) => {
+        console.log("Setting up app...");
         const controllers = [];
         app.addControlGui(gui => {
             const colorFolder = gui.addFolder('Colors');
@@ -110,8 +117,11 @@ const Main = () => {
             });
         });
 
+        console.log("Controllers initialized", controllers);
+
         app.camera.position.z = config.sizes.globe * 2.85;
         app.camera.position.y = config.sizes.globe * 0;
+        console.log("Camera position set");
         app.controls.enableDamping = true;
         app.controls.dampingFactor = 0.05;
         app.controls.rotateSpeed = 0.07;
@@ -125,6 +135,8 @@ const Main = () => {
         const globe = new Globe();
         groups.main.add(globe);
 
+        console.log("Globe added to scene");
+
         const points = new Points(data.grid);
         groups.globe.add(groups.points);
 
@@ -135,10 +147,14 @@ const Main = () => {
         groups.globe.add(groups.lines);
 
         app.scene.add(groups.main);
+
+        console.log("Scene setup completed");
     };
 
     const animate = (app) => {
+        console.log("Animating app...");
         if (controls.changed) {
+            console.log("Controls have changed, updating elements...");
             // Logique de mise à jour des éléments
             if (elements.globePoints) {
                 elements.globePoints.material.size = config.sizes.globeDotSize;
@@ -192,6 +208,7 @@ const Main = () => {
         }
 
         if (animations.rotateGlobe) {
+            console.log("Rotating globe");
             groups.globe.rotation.y -= 0.0025;
         }
     };
@@ -214,7 +231,12 @@ const Main = () => {
 
     // Rendu conditionnel pour le chargement
     if (isLoading) {
+        console.log("Globe is loading...");
         return <div>Loading...</div>; // Affiche un loader pendant le chargement
+    }
+
+    if (loadedData.countries) {
+        console.log("Loaded countries data:", loadedData.countries);
     }
 
     if (data.error) {
@@ -222,20 +244,18 @@ const Main = () => {
     }
 
     return (
-        <body>
-            <div className="app-wrapper">
-                <canvas ref={appRef}></canvas>
-                <Globe loader={loader} />
-                <Markers data={loadedData.countries} />
-                <Lines data={loadedData.connections} />
-                <Points data={loadedData.grid} />
-                <ul className="markers">
-                    {loadedData.countries && loadedData.countries.map((country, index) => (
-                        <li key={index} className="marker">{country.name}</li>
-                    ))}
-                </ul>
-            </div>
-        </body>
+        <div className="app-wrapper">
+            <canvas ref={appRef}></canvas>
+            <Globe loader={loader} />
+            <Markers data={loadedData.countries} />
+            <Lines data={loadedData.connections} />
+            <Points data={loadedData.grid} />
+            <ul className="markers">
+                {loadedData.countries && loadedData.countries.map((country, index) => (
+                    <li key={index} className="marker">{country.name}</li>
+                ))}
+            </ul>
+        </div>
     );   
 };
 
