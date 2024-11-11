@@ -3,7 +3,9 @@ import * as THREE from 'three';
 import React, { Component } from 'react';
 import OrbitControls from 'three-orbitcontrols';
 import Stats from 'stats.js';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 
+let dat;
 
 class App extends Component {
     constructor(props) {
@@ -15,15 +17,16 @@ class App extends Component {
         this.renderer = null;
         this.scene = null;
         this.camera = null;
-        this.controls = null;
+        this.orbitControls = null;
+        this.pointerLockControls = null;
         this.cancelAnimationFrameId = null;
+
         window.app = this;
     }
 
     async componentDidMount() {
-        // Importation conditionnelle de dat.gui
         if (typeof window !== 'undefined') {
-            dat = await import('dat.gui'); // Importe uniquement côté client
+            dat = await import('dat.gui');
         }
 
         this.initScene();
@@ -57,10 +60,12 @@ class App extends Component {
         }
     }
 
+    // Initialiser la scène
     initScene = () => {
         this.scene = new THREE.Scene();
     }
 
+    // Initialiser le renderer
     initRenderer = () => {
         this.renderer = new THREE.WebGLRenderer({ alpha: true });
         this.renderer.setClearColor(0x000000, 1.0);
@@ -72,6 +77,7 @@ class App extends Component {
         document.body.appendChild(this.renderer.domElement);
     }
 
+    // Initialiser la caméra
     initCamera = () => {
         this.ratio = window.innerWidth / window.innerHeight;
         this.camera = new THREE.PerspectiveCamera(60, this.ratio, 0.1, 10000);
@@ -79,8 +85,29 @@ class App extends Component {
         this.camera.position.set(0, 15, 30);
     }
 
+    // Remplacer TrackballControls par PointerLockControls
     initControls = () => {
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        // OrbitControls
+        this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.orbitControls.enableDamping = true;
+        this.orbitControls.dampingFactor = 0.25;
+
+        // PointerLockControls
+        this.pointerLockControls = new PointerLockControls(this.camera, document.body);
+
+        // Détecter le clic pour activer le contrôle du pointeur
+        document.addEventListener('click', () => {
+            this.pointerLockControls.lock();
+        });
+
+        // Écouter les événements de verrouillage et de déverrouillage
+        this.pointerLockControls.addEventListener('lock', () => {
+            console.log('Pointer locked');
+        });
+
+        this.pointerLockControls.addEventListener('unlock', () => {
+            console.log('Pointer unlocked');
+        });
     }
 
     initStats = () => {
@@ -99,14 +126,11 @@ class App extends Component {
     update = () => {
         this.animate(this);
         this.stats.update();
-        this.controls.update();
+
+        // Mettre à jour OrbitControls et PointerLockControls
+        if (this.orbitControls) this.orbitControls.update();
         this.renderer.render(this.scene, this.camera);
         this.cancelAnimationFrameId = requestAnimationFrame(this.update);
-    }
-
-    addControlGui = callback => {
-        const gui = new dat.GUI();
-        callback(gui);
     }
 
     handleResize = () => {
