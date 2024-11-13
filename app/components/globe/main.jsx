@@ -11,27 +11,41 @@ import Points from './points';
 import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
 import "./main.module.css"
+import gridData from '~/components/globe/data/grid.js';
+import countriesData from '~/components/globe/data/countries.js';
+import connectionsData from '~/components/globe/data/connections.js';
 
 
 const Main = () => {
     console.log("Main component loaded");
     const [controls, setControls] = useState({});
     const [loadedData, setLoadedData] = useState({});
-    const [isLoading, setIsLoading] = useState(true); // Nouvel état pour le chargement
+    const [isLoading, setIsLoading] = useState(true);
     const appRef = useRef(null);
     const loader = new THREE.TextureLoader();
 
     useEffect(() => {
+        const loadNoiseLibrary = async () => {
+            // Chargement dynamique du fichier perlin-noise.js
+            await import('./libs/perlin-noise.js');
+            console.log("Perlin noise library loaded");
+        };
+
+        loadNoiseLibrary();
+
         console.log("App initialized");
         const app = new App({ setup, animate, preload });
         appRef.current = app;
 
         const loadData = async () => {
             console.log("Loading data...");
-            await preload(); // Charge les données
-            setup(appRef.current); // Configure après le chargement
-            console.log("Data loaded and setup completed");
-            setIsLoading(false); // Indique que le chargement est terminé
+            const result = await preload();
+            console.log("Preload result:", result);
+            if (result) {
+                setup(appRef.current);
+                console.log("Data loaded and setup completed");
+                setIsLoading(false);
+            }
         };
 
         loadData();
@@ -45,37 +59,17 @@ const Main = () => {
         };
     }, []);
 
-    useEffect(() => {
-        // Import dynamique du script
-        const script = document.createElement('script');
-        script.src = "~/components/globe/libs/perlin-noise.js";
-        script.async = true;
-        document.body.appendChild(script);
-
-        return () => {
-            // Cleanup : suppression du script quand le composant est démonté
-            document.body.removeChild(script);
-        };
-    }, []);
-
     const preload = async () => {
         try {
             console.log("Preloading data...");
             // Vous pouvez décommenter et utiliser ces lignes selon vos besoins
             // Chargement des données
-            // const gridUrl = '~/components/globe/data/grid.js';
-            // const gridRes = await fetch(gridUrl);
-            // loadedData.grid = await gridRes.json();
+            loadedData.grid = gridData.grid;
+            loadedData.countries = countriesData.countries;
 
-            // const countryUrl = '~/components/globe/data/countries.js';
-            // const countryRes = await fetch(countryUrl);
-            // loadedData.countries = await countryRes.json();
+            loadedData.connections = getCountries(connectionsData.connections, loadedData.countries);
 
-            // const connectionsUrl = '~/components/globe/data/connections.js';
-            // const connectionsRes = await fetch(connectionsUrl);
-            // loadedData.connections = getCountries(await connectionsRes.json(), loadedData.countries);    
-
-            setLoadedData(loadedData); // Met à jour l'état avec les données chargées
+            setLoadedData(loadedData);
             console.log("Preloading completed successfully", loadedData);
             return true;
         } catch (error) {
@@ -232,7 +226,7 @@ const Main = () => {
     // Rendu conditionnel pour le chargement
     if (isLoading) {
         console.log("Globe is loading...");
-        return <div>Loading...</div>; // Affiche un loader pendant le chargement
+        return <div>Loading...</div>;
     }
 
     if (loadedData.countries) {
@@ -240,7 +234,7 @@ const Main = () => {
     }
 
     if (data.error) {
-        return <div>Error loading data: {data.error.message}</div>; // Affiche une erreur si le chargement échoue
+        return <div>Error loading data: {data.error.message}</div>;
     }
 
     return (
@@ -256,7 +250,7 @@ const Main = () => {
                 ))}
             </ul>
         </div>
-    );   
+    );
 };
 
 export default Main;
