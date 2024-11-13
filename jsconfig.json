@@ -6,5 +6,5 @@
             "~/*": ["app/*"]
         }
     },
-    "include": ["app/**/*"]
+    "include": ["app/**/*", "app/components/globe/data"]
 }

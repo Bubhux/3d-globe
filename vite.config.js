@@ -24,6 +24,7 @@ export default defineConfig({
             '~': resolve(__dirname, 'app'),
             '~app': resolve(__dirname, 'app'),
             '~static': resolve(__dirname, 'static'),
+            '~data': resolve(__dirname, 'public/data'),
         },
     },
     plugins: [
