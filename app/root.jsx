@@ -15,8 +15,8 @@ export function Layout({ children }) {
             </head>
             <body>
                 {children}
-                <ScrollRestoration />
                 <Scripts />
+                <ScrollRestoration />
             </body>
         </html>
     );
