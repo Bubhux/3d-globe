@@ -8,12 +8,12 @@ import Lines from './lines';
 import Markers from './markers';
 import Points from './points';
 
-import { getCountries } from '~/components/globe/data/processing';
-import { config, elements, groups, animations } from '~/components/globe/utils/config';
-import "./main.module.css"
 import gridData from '~/components/globe/data/grid.js';
 import countriesData from '~/components/globe/data/countries.js';
 import connectionsData from '~/components/globe/data/connections.js';
+import { getCountries } from '~/components/globe/data/processing';
+import { config, elements, groups, animations } from '~/components/globe/utils/config';
+import "./main.module.css"
 
 
 const Main = () => {
