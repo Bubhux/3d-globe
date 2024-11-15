@@ -11,8 +11,6 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
 
     useEffect(() => {
         const geometry = new THREE.SphereGeometry(radius, 64, 64);
-
-        // Création du groupe Globe
         groups.globe = new THREE.Group();
         groups.globe.name = 'Globe';
 
@@ -40,6 +38,8 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
 
         groups.map.add(globe);
         groups.globe.add(groups.map);
+
+        console.log("Globe initialized:", elements.globe);
     };
 
     const initAtmosphere = () => {
