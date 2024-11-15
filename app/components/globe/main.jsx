@@ -20,6 +20,7 @@ const Main = () => {
     console.log("Main component loaded");
     const [controls, setControls] = useState({});
     const [loadedData, setLoadedData] = useState({});
+    const [data, setData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const appRef = useRef(null);
     const loader = new THREE.TextureLoader();
@@ -69,6 +70,7 @@ const Main = () => {
 
             loadedData.connections = getCountries(connectionsData.connections, loadedData.countries);
 
+            setData(loadedData);
             setLoadedData(loadedData);
             console.log("Preloading completed successfully", loadedData);
             return true;
@@ -132,13 +134,13 @@ const Main = () => {
         console.log("Globe added to scene");
 
         const points = new Points(data.grid);
-        groups.globe.add(groups.points);
+        groups.globe.add(points);
 
         const markers = new Markers(data.countries);
-        groups.globe.add(groups.markers);
+        groups.globe.add(markers);
 
         const lines = new Lines();
-        groups.globe.add(groups.lines);
+        groups.globe.add(lines);
 
         app.scene.add(groups.main);
 
@@ -149,18 +151,20 @@ const Main = () => {
         console.log("Animating app...");
         if (controls.changed) {
             console.log("Controls have changed, updating elements...");
-            // Logique de mise à jour des éléments
             if (elements.globePoints) {
                 elements.globePoints.material.size = config.sizes.globeDotSize;
                 elements.globePoints.material.color.set(config.colors.globeDotColor);
             }
 
             if (elements.globe) {
+                console.log("Globe is initialized:", elements.globe);
                 elements.globe.scale.set(
                     config.scale.globeScale,
                     config.scale.globeScale,
                     config.scale.globeScale
                 );
+            } else {
+                console.error("Globe is not initialized.");
             }
 
             if (elements.lines) {
@@ -202,9 +206,17 @@ const Main = () => {
         }
 
         if (animations.rotateGlobe) {
-            console.log("Rotating globe");
-            groups.globe.rotation.y -= 0.0025;
+            if (groups.globe) {
+                console.log("Rotating globe");
+                groups.globe.rotation.y -= 0.0025;
+            } else {
+                console.error("groups.globe is not initialized.");
+                return;
+            }
         }
+
+        // Rendu de la scène
+        app.renderer.render(app.scene, app.camera);
     };
 
     useEffect(() => {
