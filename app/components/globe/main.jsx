@@ -11,6 +11,7 @@ import Points from './points';
 import gridData from '~/components/globe/data/grid.js';
 import countriesData from '~/components/globe/data/countries.js';
 import connectionsData from '~/components/globe/data/connections.js';
+import styles from '~/components/globe/main.module.css';
 import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
 import "./main.module.css"
@@ -238,7 +239,7 @@ const Main = () => {
     // Rendu conditionnel pour le chargement
     if (isLoading) {
         console.log("Globe is loading...");
-        return <div>Loading...</div>;
+        return <div className={styles['margin-left']}>Loading...</div>;
     }
 
     if (loadedData.countries) {
