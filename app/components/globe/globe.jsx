@@ -17,6 +17,12 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
         initGlobe(geometry);
         initAtmosphere();
 
+        if (globeRef.current) {
+            globeRef.current.add(groups.globe);
+        } else {
+            console.error("La référence globeRef n'est pas définie");
+        }
+
         return () => {
             // Nettoyage si nécessaire
             if (groups.globe.parent) {
