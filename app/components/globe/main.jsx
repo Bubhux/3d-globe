@@ -12,6 +12,7 @@ import gridData from '~/components/globe/data/grid.js';
 import countriesData from '~/components/globe/data/countries.js';
 import connectionsData from '~/components/globe/data/connections.js';
 import styles from '~/components/globe/main.module.css';
+
 import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
 import "./main.module.css"
@@ -64,7 +65,6 @@ const Main = () => {
     const preload = async () => {
         try {
             console.log("Preloading data...");
-            // Vous pouvez décommenter et utiliser ces lignes selon vos besoins
             // Chargement des données
             loadedData.grid = gridData.grid;
             loadedData.countries = countriesData.countries;
@@ -206,18 +206,15 @@ const Main = () => {
             });
         }
 
-        if (animations.rotateGlobe) {
+        const animate = (app) => {
             if (groups.globe) {
                 console.log("Rotating globe");
                 groups.globe.rotation.y -= 0.0025;
             } else {
                 console.error("groups.globe is not initialized.");
-                return;
             }
-        }
-
-        // Rendu de la scène
-        app.renderer.render(app.scene, app.camera);
+            app.renderer.render(app.scene, app.camera);
+        };
     };
 
     useEffect(() => {

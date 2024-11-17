@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import React, { Component } from 'react';
 import OrbitControls from 'three-orbitcontrols';
 import Stats from 'stats.js';
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
+
 
 let dat;
 
@@ -18,8 +19,9 @@ class App extends Component {
         this.scene = null;
         this.camera = null;
         this.orbitControls = null;
-        this.pointerLockControls = null;
+        this.trackballControls = null;
         this.cancelAnimationFrameId = null;
+        this.gui = null;
 
         window.app = this;
     }
@@ -54,18 +56,18 @@ class App extends Component {
         if (this.cancelAnimationFrameId) {
             cancelAnimationFrame(this.cancelAnimationFrameId);
         }
-
         if (this.renderer) {
             this.renderer.dispose();
         }
+        if (this.gui) {
+            this.gui.destroy();
+        }
     }
 
-    // Initialiser la scène
     initScene = () => {
         this.scene = new THREE.Scene();
     }
 
-    // Initialiser le renderer
     initRenderer = () => {
         this.renderer = new THREE.WebGLRenderer({ alpha: true });
         this.renderer.setClearColor(0x000000, 1.0);
@@ -77,7 +79,6 @@ class App extends Component {
         document.body.appendChild(this.renderer.domElement);
     }
 
-    // Initialiser la caméra
     initCamera = () => {
         this.ratio = window.innerWidth / window.innerHeight;
         this.camera = new THREE.PerspectiveCamera(60, this.ratio, 0.1, 10000);
@@ -85,29 +86,17 @@ class App extends Component {
         this.camera.position.set(0, 15, 30);
     }
 
-    // Remplacer TrackballControls par PointerLockControls
     initControls = () => {
-        // OrbitControls
+        // Initialiser OrbitControls
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.enableDamping = true;
         this.orbitControls.dampingFactor = 0.25;
 
-        // PointerLockControls
-        this.pointerLockControls = new PointerLockControls(this.camera, document.body);
-
-        // Détecter le clic pour activer le contrôle du pointeur
-        document.addEventListener('click', () => {
-            this.pointerLockControls.lock();
-        });
-
-        // Écouter les événements de verrouillage et de déverrouillage
-        this.pointerLockControls.addEventListener('lock', () => {
-            console.log('Pointer locked');
-        });
-
-        this.pointerLockControls.addEventListener('unlock', () => {
-            console.log('Pointer unlocked');
-        });
+        // Initialiser TrackballControls
+        this.trackballControls = new TrackballControls(this.camera, this.renderer.domElement);
+        this.trackballControls.rotateSpeed = 1.0;
+        this.trackballControls.zoomSpeed = 1.2;
+        this.trackballControls.panSpeed = 0.8;
     }
 
     initStats = () => {
@@ -127,8 +116,10 @@ class App extends Component {
         this.animate(this);
         this.stats.update();
 
-        // Mettre à jour OrbitControls et PointerLockControls
-        if (this.orbitControls) this.orbitControls.update();
+        // Mettre à jour les deux contrôles
+        this.orbitControls.update();
+        this.trackballControls.update();
+
         this.renderer.render(this.scene, this.camera);
         this.cancelAnimationFrameId = requestAnimationFrame(this.update);
     }
@@ -139,8 +130,15 @@ class App extends Component {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    addControlGui = (callback) => {
+        if (dat) {
+            this.gui = new dat.GUI();
+            callback(this.gui);
+        }
+    }
+
     render() {
-        return null; // Le rendu de ce composant se fait via le WebGLRenderer.
+        return null;
     }
 }
 
