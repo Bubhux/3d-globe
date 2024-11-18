@@ -29,7 +29,6 @@ const Main = () => {
 
     useEffect(() => {
         const loadNoiseLibrary = async () => {
-            // Chargement dynamique du fichier perlin-noise.js
             await import('./libs/perlin-noise.js');
             console.log("Perlin noise library loaded");
         };
@@ -46,8 +45,9 @@ const Main = () => {
             console.log("Preload result:", result);
             if (result) {
                 setup(appRef.current);
-                console.log("Data loaded and setup completed");
+                setLoadedData(loadedData);
                 setIsLoading(false);
+                console.log("Data loaded and setup completed");
             }
         };
 
@@ -65,11 +65,11 @@ const Main = () => {
     const preload = async () => {
         try {
             console.log("Preloading data...");
-            // Chargement des données
-            loadedData.grid = gridData.grid;
-            loadedData.countries = countriesData.countries;
-
-            loadedData.connections = getCountries(connectionsData.connections, loadedData.countries);
+            const loadedData = {
+                grid: gridData.grid,
+                countries: countriesData.countries,
+                connections: getCountries(connectionsData.connections, countriesData.countries),
+            };
 
             setData(loadedData);
             setLoadedData(loadedData);
@@ -77,12 +77,15 @@ const Main = () => {
             return true;
         } catch (error) {
             console.error("Error during preloading:", error);
+            return false;
         }
     };
 
     const setup = (app) => {
         console.log("Setting up app...");
         const controllers = [];
+
+        // Initialiser l'interface de contrôle
         app.addControlGui(gui => {
             const colorFolder = gui.addFolder('Colors');
             controllers.push(colorFolder.addColor(config.colors, 'globeDotColor'));
@@ -123,28 +126,31 @@ const Main = () => {
         app.controls.dampingFactor = 0.05;
         app.controls.rotateSpeed = 0.07;
 
-        const groups = {
-            main: new THREE.Group(),
-            globe: new THREE.Group()
-        };
-        groups.main.name = 'Main';
+        const mainGroup = new THREE.Group();
+        const globeGroup = new THREE.Group();
+        groups.globe = globeGroup;
+        mainGroup.name = 'Main';
 
         const globe = new Globe();
-        groups.main.add(globe);
+        elements.globe = globe;
+        globeGroup.add(globe);
 
-        console.log("Globe added to scene");
+        console.log("Globe added to globeGroup");
 
         const points = new Points(data.grid);
-        groups.globe.add(points);
+        globeGroup.add(points);
 
         const markers = new Markers(data.countries);
-        groups.globe.add(markers);
+        globeGroup.add(markers);
 
         const lines = new Lines();
-        groups.globe.add(lines);
+        globeGroup.add(lines);
 
-        app.scene.add(groups.main);
+        mainGroup.add(globeGroup);
+        app.scene.add(mainGroup);
 
+        console.log("Elements:", elements);
+        console.log("Groups:", groups);
         console.log("Scene setup completed");
     };
 
@@ -152,6 +158,7 @@ const Main = () => {
         console.log("Animating app...");
         if (controls.changed) {
             console.log("Controls have changed, updating elements...");
+
             if (elements.globePoints) {
                 elements.globePoints.material.size = config.sizes.globeDotSize;
                 elements.globePoints.material.color.set(config.colors.globeDotColor);
@@ -159,11 +166,7 @@ const Main = () => {
 
             if (elements.globe) {
                 console.log("Globe is initialized:", elements.globe);
-                elements.globe.scale.set(
-                    config.scale.globeScale,
-                    config.scale.globeScale,
-                    config.scale.globeScale
-                );
+                elements.globe.scale.set(config.scale.globeScale, config.scale.globeScale, config.scale.globeScale);
             } else {
                 console.error("Globe is not initialized.");
             }
@@ -206,15 +209,19 @@ const Main = () => {
             });
         }
 
-        const animate = (app) => {
-            if (groups.globe) {
-                console.log("Rotating globe");
-                groups.globe.rotation.y -= 0.0025;
-            } else {
-                console.error("groups.globe is not initialized.");
-            }
-            app.renderer.render(app.scene, app.camera);
-        };
+        if (groups.globe) {
+            console.log("Rotating globe");
+            groups.globe.rotation.y -= 0.0025;
+        } else {
+            console.error("groups.globe is not initialized.");
+        }
+
+        if (!app.renderer || !groups.globe) {
+            console.error("Renderer or globe group is not initialized.");
+            return;
+        }
+
+        app.renderer.render(app.scene, app.camera);
     };
 
     useEffect(() => {

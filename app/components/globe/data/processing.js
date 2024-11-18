@@ -1,3 +1,5 @@
+// app/components/globe/data/processing.js
+
 // Select countries
 export const SouthAmerica = [
     'Ecuador',
@@ -105,14 +107,42 @@ export const connections = {
     'Fiji': ['Tuvalu', 'Nauru', 'Kiribati', 'Tonga', 'New Caledonia', 'New Zealand']
 }
 
+export function getCountries(connections, countries) {
+    return Object.keys(connections).reduce((result, country) => {
+        //console.log(`Processing country: ${country}`);
+        //console.log(`Connections for ${country}:`, connections[country]);
 
-export function getCountry(name, countries) {
-    return countries.find(c => c.name === name);
+        const countryConnections = connections[country].map(connection => {
+            let connectionName;
+            if (typeof connection === 'string') {
+                connectionName = connection;
+            } else if (typeof connection === 'object' && connection !== null && connection.name) {
+                connectionName = connection.name;
+            } else {
+                //console.warn(`Expected a string or object with a name property, got:`, connection);
+                return null;
+            }
+
+            const countryDetail = getCountry(connectionName, countries);
+            //console.log(`Found connection: ${countryDetail ? countryDetail.name : 'not found'}`);
+            return countryDetail;
+        });
+
+        //console.log(`Connections processed for ${country}:`, countryConnections);
+        result[country] = countryConnections;
+        return result;
+    }, {});
 }
 
-export function getCountries(object, countries) {
-    return Object.keys(object).reduce((r, e) => {
-        r[e] = object[e].map(c => getCountry(c, countries))
-        return r;
-    }, {})
+function getCountry(name, countries) {
+    if (typeof name !== 'string') {
+        //console.error(`Expected a string for country name, got:`, name);
+        return null;
+    }
+
+    const normalizedName = name.trim().toLowerCase();
+    //console.log(`Searching for country: ${normalizedName}`);
+    const foundCountry = countries.find(country => country.name.trim().toLowerCase() === normalizedName);
+    //console.log(foundCountry ? `Found: ${foundCountry.name}` : 'Not found');
+    return foundCountry || null;
 }
