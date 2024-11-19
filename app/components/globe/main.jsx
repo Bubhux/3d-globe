@@ -1,5 +1,5 @@
 // app/components/globe/main.jsx
-import * as THREE from 'three';
+import { THREE } from '~/components/globe/utils/three';
 import React, { useEffect, useRef, useState } from 'react';
 
 import App from './app';
@@ -42,15 +42,14 @@ const Main = () => {
         const loadData = async () => {
             console.log("Loading data...");
             const result = await preload();
-            console.log("Preload result:", result);
             if (result) {
                 setup(appRef.current);
-                setLoadedData(loadedData);
                 setIsLoading(false);
-                console.log("Data loaded and setup completed");
+            } else {
+                console.error("Preloading failed.");
             }
         };
-
+        
         loadData();
 
         window.onload = app.init;
@@ -85,7 +84,7 @@ const Main = () => {
         console.log("Setting up app...");
         const controllers = [];
 
-        // Initialiser l'interface de contrôle
+        // Initialise l'interface de contrôle
         app.addControlGui(gui => {
             const colorFolder = gui.addFolder('Colors');
             controllers.push(colorFolder.addColor(config.colors, 'globeDotColor'));
@@ -149,6 +148,8 @@ const Main = () => {
         mainGroup.add(globeGroup);
         app.scene.add(mainGroup);
 
+        console.log("Main group:", mainGroup);
+        console.log("Globe group:", globeGroup);
         console.log("Elements:", elements);
         console.log("Groups:", groups);
         console.log("Scene setup completed");

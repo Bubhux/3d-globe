@@ -1,9 +1,9 @@
 // app/components/globe/app.jsx
-import * as THREE from 'three';
+import { THREE } from '~/components/globe/utils/three';
 import React, { Component } from 'react';
 import OrbitControls from 'three-orbitcontrols';
 import Stats from 'stats.js';
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
+import TrackballControls from '~/components/globe/utils/controls';
 
 
 let dat;

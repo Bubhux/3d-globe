@@ -1,5 +1,5 @@
 // app/components/globe/points.jsx
-import * as THREE from 'three';
+import { THREE } from '~/components/globe/utils/three';
 import React, { useEffect } from 'react';
 import { fabric } from 'fabric';
 
