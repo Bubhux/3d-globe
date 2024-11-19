@@ -1,5 +1,5 @@
 // app/components/globe/globe.jsx
-import * as THREE from 'three';
+import { THREE } from '~/components/globe/utils/three';
 import { useEffect, useRef } from 'react';
 import { shaders } from '~/components/globe/utils/shaders';
 import { config, elements, groups } from '~/components/globe/utils/config';

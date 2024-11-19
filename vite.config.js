@@ -25,7 +25,7 @@ export default defineConfig({
             '~app': resolve(__dirname, 'app'),
             '~static': resolve(__dirname, 'static'),
             '~data': resolve(__dirname, 'public/data'),
-            'three': resolve('./node_modules/three'),
+            'three': resolve(__dirname, 'node_modules/three/src/Three.js')
         },
     },
     plugins: [
