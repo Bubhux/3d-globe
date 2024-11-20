@@ -91,7 +91,7 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
 
     return (
         <div ref={globeRef}>
-            {isLoading && <p>Loading...</p>}
+            {isLoading && <p>Loading globe.jsx...</p>}
         </div>
     );
 };
