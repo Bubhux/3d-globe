@@ -1,3 +1,4 @@
+// app/components/globe/libs/orbit-controls.js
 /**
  * Minified by jsDelivr using Terser v3.14.1.
  * Original file: /npm/three-orbitcontrols@2.102.2/OrbitControls.js
