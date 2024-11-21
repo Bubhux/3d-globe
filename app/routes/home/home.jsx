@@ -1,6 +1,6 @@
 // app/routes/home/home.jsx
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import styles from '~/components/globe/main.module.css';
+//import styles from '~/components/globe/main.module.css';
 
 
 const Main = lazy(() => import('~/components/globe/main'));
@@ -14,9 +14,9 @@ const Home = () => {
 
     return (
         <div>
-            <h1 className={styles['margin-left']}>Welcome to the Globe Application</h1>
+            <h1>Welcome to the Globe Application</h1>
             {isClient && (
-                <Suspense fallback={<div className={styles['margin-left']}>Loading Globe...</div>}>
+                <Suspense fallback={<div>Loading Globe...</div>}>
                     <Main />
                 </Suspense>
             )}

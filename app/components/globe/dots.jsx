@@ -1,5 +1,5 @@
 // app/components/globe/dots.jsx
-import { THREE } from '~/components/globe/utils/three';
+import * as THREE from 'three';
 import React, { useEffect, useRef } from 'react';
 import { config, groups, countries } from '~/components/globe/utils/config';
 

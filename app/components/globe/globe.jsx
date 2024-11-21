@@ -1,13 +1,12 @@
 // app/components/globe/globe.jsx
-import { THREE } from '~/components/globe/utils/three';
-import { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { shaders } from '~/components/globe/utils/shaders';
 import { config, elements, groups } from '~/components/globe/utils/config';
+import * as THREE from 'three';
 
 
-const Globe = ({ isLoading, setIsLoading, loader }) => {
+const Globe = ({ scene, setIsLoading, loader }) => {
     const radius = config.sizes.globe;
-    const globeRef = useRef(null);
 
     useEffect(() => {
         const geometry = new THREE.SphereGeometry(radius, 64, 64);
@@ -17,19 +16,17 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
         initGlobe(geometry);
         initAtmosphere();
 
-        if (globeRef.current) {
-            globeRef.current.add(groups.globe);
-        } else {
-            console.error("La référence globeRef n'est pas définie");
+        if (scene) {
+            scene.add(groups.globe);
         }
 
         return () => {
-            // Nettoyage si nécessaire
-            if (groups.globe.parent) {
-                groups.globe.parent.remove(groups.globe);
+            if (scene) {
+                scene.remove(groups.globe);
             }
+            geometry.dispose();
         };
-    }, [radius, loader, setIsLoading]);
+    }, [scene, setIsLoading, loader]);
 
     const initGlobe = (geometry) => {
         const scale = config.scale.globeScale;
@@ -38,14 +35,11 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
         globe.scale.set(scale, scale, scale);
         elements.globe = globe;
 
-        // Création du groupe Map
         groups.map = new THREE.Group();
         groups.map.name = 'Map';
 
         groups.map.add(globe);
         groups.globe.add(groups.map);
-
-        console.log("Globe initialized:", elements.globe);
     };
 
     const initAtmosphere = () => {
@@ -54,7 +48,6 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
         atmosphere.scale.set(1.2, 1.2, 1.2);
         elements.atmosphere = atmosphere;
 
-        // Création du groupe Atmosphère
         groups.atmosphere = new THREE.Group();
         groups.atmosphere.name = 'Atmosphere';
 
@@ -89,11 +82,7 @@ const Globe = ({ isLoading, setIsLoading, loader }) => {
         });
     };
 
-    return (
-        <div ref={globeRef}>
-            {isLoading && <p>Loading globe.jsx...</p>}
-        </div>
-    );
+    return null;
 };
 
 export default Globe;

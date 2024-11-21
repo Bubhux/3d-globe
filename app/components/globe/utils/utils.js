@@ -1,5 +1,5 @@
 // app/components/globe/utils/utils.js
-import { THREE } from '~/components/globe/utils/three';
+import * as THREE from 'three';
 import * as d3 from 'd3';
 
 

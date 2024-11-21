@@ -1,5 +1,5 @@
 // app/components/globe/marker.jsx
-import { THREE } from '~/components/globe/utils/three';
+import * as THREE from 'three';
 import React, { useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
 import { config, elements, groups, textures } from '~/components/globe/utils/config';
