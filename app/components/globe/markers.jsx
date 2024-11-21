@@ -1,5 +1,5 @@
 // app/components/globe/markers.jsx
-import { THREE } from '~/components/globe/utils/three';
+import * as THREE from 'three';
 import React, { useEffect } from 'react';
 import { toSphereCoordinates } from './utils/utils';
 import { config, groups, elements } from '~/components/globe/utils/config';

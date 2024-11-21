@@ -1,12 +1,10 @@
 // app/components/globe/app.jsx
-import { THREE } from '~/components/globe/utils/three';
 import React, { Component } from 'react';
-import OrbitControls from 'three-orbitcontrols';
+import { OrbitControls } from 'three-stdlib';
 import Stats from 'stats.js';
-import TrackballControls from '~/components/globe/utils/controls';
+import dat from 'dat.gui';
+import * as THREE from 'three';
 
-
-let dat;
 
 class App extends Component {
     constructor(props) {
@@ -14,54 +12,23 @@ class App extends Component {
         this.preload = props.preload;
         this.animate = props.animate;
         this.setup = props.setup;
-        this.stats = null;
-        this.renderer = null;
-        this.scene = null;
-        this.camera = null;
-        this.orbitControls = null;
-        this.trackballControls = null;
-        this.cancelAnimationFrameId = null;
-        this.gui = null;
-
         window.app = this;
+        this.init();
     }
 
-    async componentDidMount() {
-        if (typeof window !== 'undefined') {
-            dat = await import('dat.gui');
-        }
-
+    init = async () => {
         this.initScene();
         this.initRenderer();
         this.initCamera();
         this.initControls();
         this.initStats();
 
-        try {
-            if (this.preload) {
-                await this.preload();
-            }
-        } catch (error) {
-            console.error("Error during preload:", error);
+        if (this.preload) {
+            await this.preload();
         }
 
-        this.initRender();
+        this.render();
         this.update();
-
-        window.addEventListener('resize', this.handleResize);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.handleResize);
-        if (this.cancelAnimationFrameId) {
-            cancelAnimationFrame(this.cancelAnimationFrameId);
-        }
-        if (this.renderer) {
-            this.renderer.dispose();
-        }
-        if (this.gui) {
-            this.gui.destroy();
-        }
     }
 
     initScene = () => {
@@ -75,7 +42,6 @@ class App extends Component {
         this.renderer.setPixelRatio(window.devicePixelRatio * 1.5);
         this.renderer.shadowMap.enabled = true;
         this.renderer.antialias = true;
-
         document.body.appendChild(this.renderer.domElement);
     }
 
@@ -87,16 +53,7 @@ class App extends Component {
     }
 
     initControls = () => {
-        // Initialiser OrbitControls
-        this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.orbitControls.enableDamping = true;
-        this.orbitControls.dampingFactor = 0.25;
-
-        // Initialiser TrackballControls
-        this.trackballControls = new TrackballControls(this.camera, this.renderer.domElement);
-        this.trackballControls.rotateSpeed = 1.0;
-        this.trackballControls.zoomSpeed = 1.2;
-        this.trackballControls.panSpeed = 0.8;
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     }
 
     initStats = () => {
@@ -108,37 +65,27 @@ class App extends Component {
         document.body.appendChild(this.stats.domElement);
     }
 
-    initRender = () => {
+    render = () => {
         this.setup(this);
     }
 
     update = () => {
         this.animate(this);
         this.stats.update();
-
-        // Mettre à jour les deux contrôles
-        this.orbitControls.update();
-        this.trackballControls.update();
-
+        this.controls.update();
         this.renderer.render(this.scene, this.camera);
-        this.cancelAnimationFrameId = requestAnimationFrame(this.update);
+        requestAnimationFrame(this.update);
+    }
+
+    addControlGui = callback => {
+        var gui = new dat.GUI();
+        callback(gui);
     }
 
     handleResize = () => {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    addControlGui = (callback) => {
-        if (dat) {
-            this.gui = new dat.GUI();
-            callback(this.gui);
-        }
-    }
-
-    render() {
-        return null;
     }
 }
 
