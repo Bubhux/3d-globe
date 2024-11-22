@@ -1,7 +1,26 @@
 // app/components/globe/dots.jsx
 import * as THREE from 'three';
-import React, { useEffect, useRef } from 'react';
-import { config, groups, countries } from '~/components/globe/utils/config';
+import { config, groups, countries, elements } from '~/components/globe/utils/config';
+
+
+class Dots extends THREE.Group {
+    constructor() {
+        super();
+        this.total = config.dots.total;
+        this.name = 'LineDots';
+
+        this.create();
+    }
+
+    create() {
+        for (let i = 0; i < config.dots.total; i++) {
+            const dot = new Dot();
+            this.add(dot.mesh);
+            elements.lineDots.push(dot);
+        }
+    }
+}
+
 
 
 class Dot {
@@ -51,42 +70,5 @@ class Dot {
         }
     }
 }
-
-const Dots = ({ scene }) => {
-    const total = config.dots.total;
-    const frameId = useRef();
-
-    useEffect(() => {
-        groups.lineDots = new THREE.Group();
-        groups.lineDots.name = 'LineDots';
-        scene.add(groups.lineDots);
-
-        createDots();
-
-        const animate = () => {
-            groups.lineDots.children.forEach(dot => dot.animate());
-            frameId.current = requestAnimationFrame(animate);
-        };
-
-        animate();
-
-        return () => {
-            if (groups.lineDots.parent) {
-                groups.lineDots.parent.remove(groups.lineDots);
-            }
-            cancelAnimationFrame(frameId.current);
-        };
-    }, [scene]);
-
-    const createDots = () => {
-        for (let i = 0; i < total; i++) {
-            const dot = new Dot();
-            groups.lineDots.add(dot.mesh);
-            elements.lineDots.push(dot);
-        }
-    };
-
-    return null; // Le rendu se fait avec Three.js, rien à afficher ici
-};
 
 export default Dots;
