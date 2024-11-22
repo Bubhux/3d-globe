@@ -134,7 +134,7 @@ export function getCountries(connections, countries) {
     }, {});
 }
 
-function getCountry(name, countries) {
+export function getCountry(name, countries) {
     if (typeof name !== 'string') {
         //console.error(`Expected a string for country name, got:`, name);
         return null;

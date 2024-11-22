@@ -1,108 +1,107 @@
 // app/components/globe/points.jsx
 import * as THREE from 'three';
-import React, { useEffect } from 'react';
+import React, { Component } from 'react';
 import { fabric } from 'fabric';
 
 import { toSphereCoordinates } from '~/components/globe/utils/utils';
 import { config, groups, elements } from '~/components/globe/utils/config';
 
 
-const Points = ({ grid, scene }) => {
-    useEffect(() => {
-        const total = grid.length;
-        const radius = config.sizes.globe + config.sizes.globe * config.scale.points;
+class Points extends Component {
+    constructor(props) {
+        super(props);
 
-        const sizeArray = [];
-        const positionArray = [];
-        const colorsArray = [];
+        this.grid = props.grid || [];
+        this.total = this.grid.length;
+        this.radius = config.sizes.globe + config.sizes.globe * config.scale.points;
 
-        const pointsGroup = new THREE.Group();
-        pointsGroup.name = 'Points';
-        groups.points = pointsGroup;
+        this.sizeArray = [];
+        this.positionArray = [];
+        this.colorsArray = [];
 
-        const createPoints = () => {
-            const color = new THREE.Color();
+        groups.points = new THREE.Group();
+        groups.points.name = 'Points';
 
-            for (let i = 0; i < total; i++) {
-                const { lat, lon } = grid[i];
-                const { x, y, z } = toSphereCoordinates(lat, lon, radius);
+        this.create();
 
-                positionArray.push(-x, -y, -z);
-                sizeArray.push(config.sizes.pointSize);
+        elements.globePoints = this.points;
+        groups.points.add(this.points);
+    }
 
-                color.set(config.colors.pointColor);
-                color.toArray(colorsArray, i * 3);
-            }
+    create() {
+        const color = new THREE.Color();
 
-            const positions = new Float32Array(positionArray);
-            const colors = new Float32Array(colorsArray);
-            const sizes = new Float32Array(sizeArray);
+        for (let i = 0; i < this.grid.length; i++) {
+            const { lat, lon } = this.grid[i];
+            const { x, y, z } = toSphereCoordinates(lat, lon, this.radius);
 
-            const texture = new THREE.Texture(createTexture());
-            const geometry = new THREE.BufferGeometry();
-            const material = new THREE.PointsMaterial({
-                color: config.colors.globeDotColor,
-                size: config.sizes.globeDotSize,
-            });
+            this.positionArray.push(-x, -y, -z);
+            this.sizeArray.push(this.pointSize);
 
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
-            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            color.set(this.pointColor);
+            color.toArray(this.colorsArray, i * 3);
+        }
 
-            const points = new THREE.Points(geometry, material);
-            pointsGroup.add(points);
-            elements.globePoints = points;
-        };
+        const positions = new Float32Array(this.positionArray);
+        const colors = new Float32Array(this.colorsArray);
+        const sizes = new Float32Array(this.sizeArray);
 
-        const updateColor = (col) => {
-            const color = new THREE.Color();
+        this.texture = new THREE.Texture(this.createTexture());
+        this.geometry = new THREE.BufferGeometry();
+        this.material = new THREE.PointsMaterial({
+            color: config.colors.globeDotColor,
+            size: config.sizes.globeDotSize
+        });
 
-            for (let i = 0; i < total; i++) {
-                color.set(col);
-                color.toArray(colorsArray, i * 3);
-            }
+        this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        this.geometry.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
+        this.geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-            const colorsArray = new Float32Array(colorsArray);
-            const colors = new THREE.BufferAttribute(colorsArray, 3);
-            pointsGroup.children[0].geometry.attributes.customColor = colors;
-            pointsGroup.children[0].geometry.attributes.customColor.needsUpdate = true;
-        };
+        this.points = new THREE.Points(this.geometry, this.material);
+    }
 
-        const createTexture = () => {
-            const radius = 60;
-            const element = document.createElement('canvas');
-            const canvas = new fabric.Canvas(element);
+    updateColor(col) {
+        const color = new THREE.Color();
 
-            canvas.setHeight(radius);
-            canvas.setWidth(radius);
+        for (let i = 0; i < this.grid.length; i++) {
+            color.set(col);
+            color.toArray(this.colorsArray, i * 3);
+        }
 
-            const rect = new fabric.Rect({
-                width: radius,
-                height: radius,
-                fill: 'white',
-            });
+        const colorsArray = new Float32Array(this.colorsArray);
+        const colors = new THREE.BufferAttribute(colorsArray, 3);
+        this.geometry.attributes.customColor = colors;
+    }
 
-            const circle = new fabric.Circle({
-                radius: radius / 2 - 2,
-                fill: 'blue',
-                left: 1,
-                top: 1,
-            });
+    createTexture() {
+        const radius = 60;
+        const element = document.createElement('canvas');
+        const canvas = new fabric.Canvas(element);
 
-            canvas.add(rect);
-            canvas.add(circle);
-            return element;
-        };
+        canvas.setHeight(radius);
+        canvas.setWidth(radius);
 
-        createPoints();
-        scene.add(pointsGroup);
+        const rect = new fabric.Rect({
+            width: radius,
+            height: radius,
+            fill: 'white'
+        });
 
-        return () => {
-            scene.remove(pointsGroup);
-        };
-    }, [grid, scene]);
+        const circle = new fabric.Circle({
+            radius: radius / 2 - 2,
+            fill: 'blue',
+            left: 1,
+            top: 1
+        });
 
-    return null; // Ce composant ne rend rien lui-même
-};
+        canvas.add(rect);
+        canvas.add(circle);
+        return element;
+    }
+
+    render() {
+        return null;
+    }
+}
 
 export default Points;

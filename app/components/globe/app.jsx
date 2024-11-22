@@ -1,7 +1,6 @@
 // app/components/globe/app.jsx
 import React, { Component } from 'react';
 import { OrbitControls } from 'three-stdlib';
-import Stats from 'stats.js';
 import dat from 'dat.gui';
 import * as THREE from 'three';
 
@@ -12,6 +11,7 @@ class App extends Component {
         this.preload = props.preload;
         this.animate = props.animate;
         this.setup = props.setup;
+        this.guiRef = null;
         window.app = this;
         this.init();
     }
@@ -21,7 +21,6 @@ class App extends Component {
         this.initRenderer();
         this.initCamera();
         this.initControls();
-        this.initStats();
 
         if (this.preload) {
             await this.preload();
@@ -56,15 +55,6 @@ class App extends Component {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     }
 
-    initStats = () => {
-        this.stats = new Stats();
-        this.stats.setMode(0);
-        this.stats.domElement.style.position = 'absolute';
-        this.stats.domElement.style.right = '10px';
-        this.stats.domElement.style.bottom = '10px';
-        document.body.appendChild(this.stats.domElement);
-    }
-
     render = () => {
         this.setup(this);
     }
@@ -77,9 +67,11 @@ class App extends Component {
         requestAnimationFrame(this.update);
     }
 
-    addControlGui = callback => {
-        var gui = new dat.GUI();
-        callback(gui);
+    addControlGui = (callback) => {
+        if (!this.guiRef) {
+            this.guiRef = new dat.GUI();
+            callback(this.guiRef);
+        }
     }
 
     handleResize = () => {

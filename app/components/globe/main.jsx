@@ -17,18 +17,28 @@ import { config, elements, groups, animations } from '~/components/globe/utils/c
 import "./main.module.css"
 
 
+//console.log("Données de grille :", gridData);
+//console.log("Données des pays :", countriesData);
+//console.log("Données des connexions :", connectionsData);
+
 const Index = () => {
+    console.log("Main component loaded");
     const [controls, setControls] = useState({ changed: false });
     const [data, setData] = useState({ grid: [], countries: [], connections: [] });
     const [isLoading, setIsLoading] = useState(true);
     const appRef = useRef();
 
     useEffect(() => {
-        appRef.current = new App({ setup, animate, preload });
-        appRef.current.init();
-        window.onresize = appRef.current.handleResize;
+        if (!appRef.current) {
+            appRef.current = new App({ setup, animate, preload });
+            //console.log("App instance created:", app);
+            window.onresize = appRef.current.handleResize;
+        }
 
         return () => {
+            if (appRef.current && appRef.current.guiRef) {
+                appRef.current.guiRef.destroy();
+            }
             window.onload = null;
             window.onresize = null;
         };
@@ -36,6 +46,7 @@ const Index = () => {
 
     const preload = async () => {
         try {
+            //console.log("Preloading data...");
             const loadedData = {
                 grid: gridData.grid,
                 countries: countriesData.countries,
@@ -43,15 +54,17 @@ const Index = () => {
             };
 
             setData(loadedData);
+            //console.log("Preloading completed successfully", loadedData);
             return true;
         } catch (error) {
-            console.error("Error during preloading:", error);
+            //console.error("Error during preloading:", error);
             setData({ error });
             return false;
-        }
+        }//
     };
 
     const setup = (app) => {
+        //console.log("Setting up app...");
         const controllers = [];
 
         app.addControlGui(gui => {
@@ -81,10 +94,12 @@ const Index = () => {
 
         controllers.forEach(controller => {
             controller.onChange(() => {
-                setControls(prevControls => ({ ...prevControls, changed: false }));
+                setControls(prevControls => ({ ...prevControls, changed: true }));
 
             });
         });
+
+        //console.log("Controllers initialized", controllers);
 
         app.camera.position.z = config.sizes.globe * 2.85;
         app.camera.position.y = config.sizes.globe * 0;
@@ -92,24 +107,49 @@ const Index = () => {
         app.controls.dampingFactor = 0.05;
         app.controls.rotateSpeed = 0.07;
 
-        const globe = new Globe({ scene: app.scene, setIsLoading, loader });
-        groups.main = new THREE.Group();
-        groups.main.name = 'Main';
-        groups.main.add(globe);
+        if (elements.globe) {
+            groups.main = new THREE.Group();
+            groups.main.name = 'Main';
+            groups.main.add(elements.globe);
 
-        const points = new Points(data.grid);
-        groups.globe.add(points);
+            if (gridData.grid.length > 0) {
+                const points = new Points(gridData);
+                groups.globe.add(points.points);
+                ////.log("Points instance created:", points);
+            } else {
+                //console.error("Grid data is not available.");
+            }
 
-        const markers = new Markers(data.countries);
-        groups.globe.add(markers);
+            if (countriesData.countries.length > 0) {
+                const markers = new Markers(countriesData);
+                groups.globe.add(markers.markers);
+                //console.log("Markers instance created:", markers);
+            } else {
+                //console.error("Countries data is not available.");
+            }
 
-        const lines = new Lines();
-        groups.globe.add(lines);
+            if (connectionsData && Object.keys(connectionsData).length > 0) {
+                console.log("Connections data before creating Lines:", connectionsData.connections);
+                const lines = new Lines({ connections: connectionsData.connections });
+                groups.globe.add(lines);
+                console.log("Lines instance created:", lines);
+            } else {
+                console.error("Lines data is not available.");
+            }
 
-        app.scene.add(groups.main);
+            app.scene.add(groups.main);
+
+            //console.log("Main group:", groups.main);
+            //console.log("Globe group:", groups.globe);
+            //console.log("Groups:", groups);
+            //console.log("Scene setup completed");
+        } else {
+            //console.error("elements.globe is not initialized.");
+        }
     };
 
     const animate = (app) => {
+        //console.log("Animating app...");
         if (controls.changed) {
             if (elements.globePoints) {
                 elements.globePoints.material.size = config.sizes.globeDotSize;
@@ -117,11 +157,10 @@ const Index = () => {
             }
 
             if (elements.globe) {
-                elements.globe.scale.set(
-                    config.scale.globeScale,
-                    config.scale.globeScale,
-                    config.scale.globeScale
-                );
+                console.log("Globe is initialized:", elements.globe);
+                elements.globe.scale.set(config.scale.globeScale, config.scale.globeScale, config.scale.globeScale);
+            } else {
+                console.error("Globe is not initialized.");
             }
 
             if (elements.lines) {
@@ -169,11 +208,28 @@ const Index = () => {
         if (animations.rotateGlobe) {
             groups.globe.rotation.y -= 0.0025;
         }
+
+        if (groups.globe) {
+            console.log("Rotating globe");
+            groups.globe.rotation.y -= 0.0025;
+        } else {
+            console.error("groups.globe is not initialized.");
+        }
+
+        if (!app.renderer || !groups.globe) {
+            console.error("Renderer or globe group is not initialized.");
+            return;
+        }
     };
 
     return (
         <div className="app-wrapper">
             {isLoading && <div>Loading...</div>}
+            <Globe
+                scene={appRef.current?.scene}
+                setIsLoading={setIsLoading}
+                loader={new THREE.TextureLoader()}
+            />
             <ul className="markers"></ul>
         </div>
     );

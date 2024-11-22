@@ -1,49 +1,61 @@
 // app/components/globe/markers.jsx
 import * as THREE from 'three';
-import React, { useEffect } from 'react';
+import React, { Component } from 'react';
 import { toSphereCoordinates } from './utils/utils';
 import { config, groups, elements } from '~/components/globe/utils/config';
 
 import Marker from './Marker';
 
 
-const Markers = ({ countries, markerRadius = 2 }) => {
-    useEffect(() => {
-        const radius = config.sizes.globe + config.sizes.globe * config.scale.markers;
+class Markers extends Component {
+    constructor(props) {
+        super(props);
+        const { countries = [], markerRadius = 2 } = props;
 
-        // Initialisation des groupes et matériaux pour les marqueurs
-        const markerGeometry = new THREE.SphereGeometry(markerRadius, 15, 15);
-        const markerMaterial = new THREE.MeshBasicMaterial({
-            transparent: true,
-            opacity: 0.8,
-        });
+        this.countries = countries;
+        this.radius = config.sizes.globe + config.sizes.globe * config.scale.markers;
 
-        groups.markers = new THREE.Group();
-        groups.markers.name = 'GlobeMarkers';
+        this.markerGeometry = new THREE.SphereGeometry(markerRadius, 15, 15);
+        this.markerMaterial = new THREE.MeshBasicMaterial();
+        this.markerMaterial.transparent = true;
+        this.markerMaterial.opacity = 0.8;
 
-        // Création des marqueurs
-        createMarkers(countries, markerGeometry, markerMaterial, radius);
+        this.markers = new THREE.Group();
+        this.markers.name = 'GlobeMarkers';
+        groups.markers = this.markers;
 
-        return () => {
-            // Nettoyage : retire les marqueurs de la scène
-            elements.markers.forEach(marker => marker.removeFromScene());
-        };
-    }, [countries, markerRadius]);
+        this.create();
+    }
 
-    const createMarkers = (countries, markerGeometry, markerMaterial, radius) => {
-        countries.forEach(country => {
+    create() {
+        if (!Array.isArray(this.countries)) {
+            //console.error("Countries is not an array:", this.countries);
+            return;
+        }
+
+        for (let i = 0; i < this.countries.length; i++) {
+            const country = this.countries[i];
             if (country.latitude && country.longitude) {
                 const lat = +country.latitude;
                 const lng = +country.longitude;
-                const cords = toSphereCoordinates(lat, lng, radius);
-                const marker = new Marker(markerMaterial, markerGeometry, country.name, cords);
-                groups.markers.add(marker);
-                elements.markers.push(marker);
-            }
-        });
-    };
 
-    return null; // Ce composant ne rend rien, il gère uniquement la logique des marqueurs
-};
+                const cords = toSphereCoordinates(lat, lng, this.radius);
+                const marker = new Marker(this.markerMaterial, this.markerGeometry, country.name, cords);
+                if (marker) {
+                    //console.log("Marker created:", marker);
+                    this.markers.add(marker.groupRef);
+                    elements.markers.push(marker);
+                } else {
+                    //console.error("Failed to create marker for:", country);
+                }
+            }
+        }
+        groups.globe.add(this.markers);
+    }
+
+    render() {
+        return null;
+    }
+}
 
 export default Markers;

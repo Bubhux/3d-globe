@@ -1,74 +1,87 @@
 // app/components/globe/lines.jsx
 import * as THREE from 'three';
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
-import { config, elements, groups, countries } from '~/components/globe/utils/config';
 
+import { config, groups, elements, countries } from '~/components/globe/utils/config';
+import { getCountry } from '~/components/globe/data/processing';
 import { getSplineFromCoords } from '~/components/globe/utils/utils';
+import connectionsData from '~/components/globe/data/connections.js';
+import gridData from '~/components/globe/data/grid.js';
+import countriesData from '~/components/globe/data/countries.js';
+
 import Dots from './dots';
 
 
+class Lines extends THREE.Object3D {
+    constructor(props) {
+        super(props);
+        const { connections } = connectionsData;
+        this.countries = Object.keys(connections);
+        this.total = this.countries.length;
+        console.log('Countries:', this.countries);
 
-const Lines = () => {
-    const [currentCountryIndex, setCurrentCountryIndex] = useState(0);
-    const groupRef = useRef(new THREE.Group());
-    const intervalRef = useRef(null);
-    const totalCountries = Object.keys(data.connections).length;
+        this.group = new THREE.Group();
+        this.group.name = 'Lines';
 
-    useEffect(() => {
-        groupRef.current.name = 'Lines';
-        createLines();
-        createDots();
-        animate();
+        this.create = this.create.bind(this);
+        this.animate = this.animate.bind(this);
+        this.changeCountry = this.changeCountry.bind(this);
+        this.select = this.select.bind(this);
+        this.createDots = this.createDots.bind(this);
+        console.log('Connections Lines Data constructor:', connections);
+        console.log('connectionsData:', connectionsData);
+        console.log('countriesData:', countriesData);
+    }
 
-        return () => {
-            clearInterval(intervalRef.current);
-            if (countries.selected) {
-                countries.selected.visible = false;
-            }
-        };
-    }, [countries.interval, data.connections]);
+    changeCountry() {
+        countries.index++;
 
-    const animate = () => {
-        if (!countries.selected) {
-            select(currentCountryIndex);
+        if (countries.index >= this.total) {
+            countries.index = 0;
         }
-        intervalRef.current = setInterval(changeCountry, countries.interval);
-    };
 
-    const changeCountry = () => {
-        setCurrentCountryIndex((prevIndex) => {
-            const newIndex = (prevIndex + 1) % totalCountries;
-            if (countries.selected && countries.selected.visible) {
-                countries.selected.visible = false;
-            }
-            select(newIndex);
-            groups.lineDots.children = [];
-            elements.lineDots = [];
-            createDots();
-            return newIndex;
-        });
-    };
-
-    const select = (index) => {
-        const nextCountry = Object.keys(data.connections)[index];
-        const selectedCountry = groups.lines.getObjectByName(nextCountry);
-        countries.selected = selectedCountry;
         if (countries.selected) {
-            countries.selected.visible = true;
+            countries.selected.visible = false;
         }
-    };
 
-    const createDots = () => {
+        this.select();
+
+        groups.lineDots.children = [];
+        elements.lineDots = [];
+        this.createDots();
+        const connections = connectionsData.connections;
+        console.log('Function changeCountry:', connections);
+    }
+
+    createDots() {
         const lineDots = new Dots();
         groups.globe.add(groups.lineDots);
-    };
+    }
 
-    const createLines = () => {
-        const { connections, countries } = data;
+    animate() {
+        console.log('Animate function called');
+        if (!countries.selected) {
+            this.select();
+        }
+
+        this.interval = setInterval(() => this.changeCountry(), countries.interval);
+    }
+
+    select() {
+        const next = this.countries[countries.index];
+        const selected = groups.lines.getObjectByName(next);
+        countries.selected = selected;
+        countries.selected.visible = true;
+    }
+
+    create() {
+        const { connections, countries } = connectionsData;
+        console.log('Connections Data function create:', connections);
 
         for (let i in connections) {
             const start = getCountry(i, countries);
+            console.log('Start country:', start);
             const group = new THREE.Group();
             group.name = i;
 
@@ -82,13 +95,13 @@ const Lines = () => {
             group.visible = false;
             groups.lines.add(group);
         }
-    };
+    }
+}
 
-    return null; // Rendu WebGL, pas de rendu React standard.
-};
 
-class Line {
+class Line extends THREE.Object3D {
     constructor(start, end) {
+        super();
         const { globe } = config.sizes;
         const { markers } = config.scale;
 
@@ -106,6 +119,7 @@ class Line {
         this.line.setGeometry(this.geometry);
 
         this.mesh = new THREE.Mesh(this.line.geometry, this.material);
+        console.log('Line mesh created:', this.mesh);
         this.mesh._path = this.geometry.vertices;
     }
 

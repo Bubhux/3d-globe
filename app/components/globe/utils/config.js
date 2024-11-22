@@ -1,8 +1,8 @@
 // app/components/globe/utils/config.js
 export const config = {
 	urls: {
-		globeTexture: './textures/earth_dark.jpg',
-		pointTexture: './img/disc.png'
+		globeTexture: 'app/components/globe/textures/earth_dark.jpg',
+		pointTexture: 'app/components/globe/img/disc.png'
 	},
 	sizes: {
 		globe: 200,
