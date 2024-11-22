@@ -1,55 +1,74 @@
 // app/components/globe/marker.jsx
 import * as THREE from 'three';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Component, createRef } from 'react';
 import { fabric } from 'fabric';
 import { config, elements, groups, textures } from '~/components/globe/utils/config';
 
 
-const Marker = ({ material, geometry, label, cords, options = {} }) => {
-    const { textColor = 'white', pointColor = config.colors.globeMarkerColor, glowColor = config.colors.globeMarkerGlow } = options;
+class Marker extends Component {
+    constructor(props) {
+        super(props);
+        const { options = {} } = props;
+        this.pointColor = options.pointColor || config.colors.globeMarkerColor;
+        this.glowColor = options.glowColor || config.colors.globeMarkerGlow;
 
-    const groupRef = useRef(new THREE.Group());
-    const [isAnimating, setIsAnimating] = useState(false);
-    const glowRef = useRef(null);
+        this.groupRef = new THREE.Group();
+        this.groupRef.name = 'Marker';
+    }
 
-    useEffect(() => {
-        const group = groupRef.current;
-        group.name = 'Marker';
+    componentDidMount() {
+        const { cords, geometry, material } = this.props;
 
-        const pointColorThree = new THREE.Color(pointColor);
-        const glowColorThree = new THREE.Color(glowColor);
+        const point = new THREE.Mesh(geometry, material);
+        const glowMaterial = new THREE.MeshBasicMaterial({ color: this.glowColor, transparent: true, opacity: 0.5 });
+        const glow = new THREE.Mesh(geometry, glowMaterial);
 
-        const labelSprite = createLabel();
-        group.add(labelSprite);
+        point.position.set(-cords.x, cords.y, -cords.z);
+        glow.position.set(-cords.x, cords.y, -cords.z);
 
-        const point = createPoint(pointColorThree);
-        group.add(point);
+        this.groupRef.add(point);
+        this.groupRef.add(glow);
 
-        const glow = createGlow(glowColorThree);
-        group.add(glow);
-        glowRef.current = glow;
+        //console.log(this.groupRef.children);
+        groups.markers.add(this.groupRef);
+    }
 
-        setPosition();
+    getGroup() {
+        return this.groupRef;
+    }
 
-        groups.markers.add(group);
+    componentWillUnmount() {
+        groups.markers.remove(this.groupRef);
+    }
 
-        return () => {
-            groups.markers.remove(group);
-        };
-    }, [geometry, material, cords, pointColor, glowColor]);
-
-    useEffect(() => {
-        if (isAnimating) {
-            const animate = () => {
-                animateGlow();
-                requestAnimationFrame(animate);
-            };
-            animate();
+    componentDidUpdate(prevProps) {
+        if (this.props.cords !== prevProps.cords) {
+            this.setPosition();
         }
-    }, [isAnimating]);
+        if (this.props.geometry !== prevProps.geometry || this.props.material !== prevProps.material) {
+            this.createPoint(new THREE.Color(this.pointColor));
+            this.createGlow(new THREE.Color(this.glowColor));
+        }
+    }
 
-    const createLabel = () => {
-        const text = createText();
+    startAnimation() {
+        this.isAnimating = true;
+        this.animate();
+    }
+
+    stopAnimation() {
+        this.isAnimating = false;
+    }
+
+    animate() {
+        if (this.isAnimating) {
+            this.animateGlow();
+            requestAnimationFrame(this.animate.bind(this));
+        }
+    }
+
+    createLabel() {
+        const text = this.createText();
         const texture = new THREE.Texture(text);
         texture.minFilter = THREE.LinearFilter;
         textures.markerLabels.push(texture);
@@ -62,60 +81,60 @@ const Marker = ({ material, geometry, label, cords, options = {} }) => {
 
         elements.markerLabel.push(sprite);
         return sprite;
-    };
+    }
 
-    const createPoint = (pointColorThree) => {
-        const point = new THREE.Mesh(geometry, material);
+    createPoint(pointColorThree) {
+        const point = new THREE.Mesh(this.props.geometry, this.props.material);
         point.material.color.set(pointColorThree);
-        elements.markerPoint.push(point);
         return point;
-    };
+    }
 
-    const createGlow = (glowColorThree) => {
-        const glowMaterial = material.clone();
-        const glow = new THREE.Mesh(geometry, glowMaterial);
+    createGlow(glowColorThree) {
+        const glowMaterial = this.props.material.clone();
+        const glow = new THREE.Mesh(this.props.geometry, glowMaterial);
         glow.material.color.set(glowColorThree);
         glow.material.opacity = 0.6;
-        elements.markerPoint.push(glow);
         return glow;
-    };
+    }
 
-    const animateGlow = () => {
-        if (glowRef.current && isAnimating) {
-            glowRef.current.scale.x += 0.025;
-            glowRef.current.scale.y += 0.025;
-            glowRef.current.scale.z += 0.025;
-            glowRef.current.material.opacity -= 0.005;
+    animateGlow() {
+        if (this.glowRef.current && this.isAnimating) {
+            this.glowRef.current.scale.x += 0.025;
+            this.glowRef.current.scale.y += 0.025;
+            this.glowRef.current.scale.z += 0.025;
+            this.glowRef.current.material.opacity -= 0.005;
 
-            if (glowRef.current.scale.x >= 4) {
-                glowRef.current.scale.set(1, 1, 1);
-                glowRef.current.material.opacity = 0.6;
-                setIsAnimating(false);
+            if (this.glowRef.current.scale.x >= 4) {
+                this.glowRef.current.scale.set(1, 1, 1);
+                this.glowRef.current.material.opacity = 0.6;
+                this.stopAnimation();
             }
         }
-    };
+    }
 
-    const setPosition = () => {
-        const { x, y, z } = cords;
-        groupRef.current.position.set(-x, y, -z);
-    };
+    setPosition() {
+        const { x, y, z } = this.props.cords;
+        this.groupRef.position.set(-x, y, -z);
+    }
 
-    const createText = () => {
+    createText() {
         const element = document.createElement('canvas');
         const canvas = new fabric.Canvas(element);
 
-        const text = new fabric.Text(label, {
+        const text = new fabric.Text(this.props.label, {
             left: 0,
             top: 0,
-            fill: textColor,
+            fill: this.textColor,
             fontFamily: 'Open Sans',
         });
 
         canvas.add(text);
         return element;
-    };
+    }
 
-    return null; // Rendu WebGL, pas de rendu React standard.
-};
+    render() {
+        return null;
+    }
+}
 
 export default Marker;
