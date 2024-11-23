@@ -1,6 +1,5 @@
 // app/components/globe/lines.jsx
 import * as THREE from 'three';
-import React, { Component } from 'react';
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
 import { config, groups, elements, countries } from '~/components/globe/utils/config';
