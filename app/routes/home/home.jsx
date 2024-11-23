@@ -14,7 +14,7 @@ const Home = () => {
 
     return (
         <div>
-            <h1>Welcome to the Globe Application</h1>
+            {/* <h1>Welcome to the Globe Application</h1> */}
             {isClient && (
                 <Suspense fallback={<div>Loading Globe...</div>}>
                     <Main />
