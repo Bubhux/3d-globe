@@ -11,7 +11,7 @@ class Marker extends Component {
         const { options = {} } = props;
         this.pointColor = options.pointColor || config.colors.globeMarkerColor;
         this.glowColor = options.glowColor || config.colors.globeMarkerGlow;
-
+        this.glowRef = React.createRef();
         this.groupRef = new THREE.Group();
         this.groupRef.name = 'Marker';
     }
@@ -23,13 +23,14 @@ class Marker extends Component {
         const glowMaterial = new THREE.MeshBasicMaterial({ color: this.glowColor, transparent: true, opacity: 0.5 });
         const glow = new THREE.Mesh(geometry, glowMaterial);
 
+        this.glowRef.current = glow;
+
         point.position.set(-cords.x, cords.y, -cords.z);
         glow.position.set(-cords.x, cords.y, -cords.z);
 
         this.groupRef.add(point);
         this.groupRef.add(glow);
 
-        //console.log(this.groupRef.children);
         groups.markers.add(this.groupRef);
     }
 
@@ -52,10 +53,12 @@ class Marker extends Component {
     }
 
     startAnimation() {
-        this.isAnimating = true;
-        this.animate();
+        if (this.glowRef.current) {
+            this.isAnimating = true;
+            this.animate();
+        }
     }
-
+    
     stopAnimation() {
         this.isAnimating = false;
     }
