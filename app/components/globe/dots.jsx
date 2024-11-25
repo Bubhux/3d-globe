@@ -22,7 +22,6 @@ class Dots extends THREE.Group {
 }
 
 
-
 class Dot {
     constructor() {
         this.radius = 2;

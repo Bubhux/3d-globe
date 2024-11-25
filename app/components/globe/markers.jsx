@@ -16,9 +16,10 @@ class Markers extends Component {
         this.radius = config.sizes.globe + config.sizes.globe * config.scale.markers;
 
         this.markerGeometry = new THREE.SphereGeometry(markerRadius, 15, 15);
-        this.markerMaterial = new THREE.MeshBasicMaterial();
-        this.markerMaterial.transparent = true;
-        this.markerMaterial.opacity = 0.8;
+        this.markerMaterial = new THREE.MeshBasicMaterial({
+            transparent: true,
+            opacity: 0.8,
+        });
 
         this.markers = new THREE.Group();
         this.markers.name = 'GlobeMarkers';
@@ -29,28 +30,38 @@ class Markers extends Component {
 
     create() {
         if (!Array.isArray(this.countries)) {
-            //console.error("Countries is not an array:", this.countries);
+            console.error("Countries is not an array:", this.countries);
             return;
         }
 
-        for (let i = 0; i < this.countries.length; i++) {
-            const country = this.countries[i];
+        const allCoords = [];
+
+        for (let country of this.countries) {
             if (country.latitude && country.longitude) {
                 const lat = +country.latitude;
                 const lng = +country.longitude;
 
                 const cords = toSphereCoordinates(lat, lng, this.radius);
-                const marker = new Marker(this.markerMaterial, this.markerGeometry, country.name, cords);
-                if (marker) {
-                    //console.log("Marker created:", marker);
-                    this.markers.add(marker.groupRef);
-                    elements.markers.push(marker);
-                } else {
-                    //console.error("Failed to create marker for:", country);
-                }
+                allCoords.push(cords);
+
+                const marker = new Marker({
+                    textColor: 'white',
+                    pointColor: this.markerMaterial.color.getHex(),
+                    glowColor: this.markerMaterial.color.getHex(),
+                    cords: cords,
+                    label: country.name,
+                    geometry: this.markerGeometry,
+                    material: this.markerMaterial
+                });
+
+                this.markers.add(marker.getGroup());
+                elements.markers.push(marker);
             }
         }
+
         groups.globe.add(this.markers);
+        //console.log("Markers added to globe:", this.markers);
+        //console.log("All marker coordinates in create:", allCoords);
     }
 
     render() {

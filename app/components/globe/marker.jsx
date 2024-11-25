@@ -8,34 +8,36 @@ import { config, elements, groups, textures } from '~/components/globe/utils/con
 class Marker extends Component {
     constructor(props) {
         super(props);
-        const { options = {} } = props;
-        this.pointColor = options.pointColor || config.colors.globeMarkerColor;
-        this.glowColor = options.glowColor || config.colors.globeMarkerGlow;
-        this.glowRef = React.createRef();
+        const {
+            material,
+            geometry,
+            label,
+            cords,
+            textColor = 'white',
+        } = props;
+
+        this.isAnimating = false;
+
+        this.textColor = textColor;
+        this.pointColor = new THREE.Color(config.colors.globeMarkerColor);
+        this.glowColor = new THREE.Color(config.colors.globeMarkerGlow);
+
         this.groupRef = new THREE.Group();
         this.groupRef.name = 'Marker';
+
+        this.labelText = label;
+        this.cords = cords;
+        this.material = material;
+        this.geometry = geometry;
+
+        this.createLabel();
+        this.createPoint();
+        this.createGlow();
+        this.setPosition();
     }
 
     componentDidMount() {
-        const { cords, geometry, material } = this.props;
-
-        const point = new THREE.Mesh(geometry, material);
-        const glowMaterial = new THREE.MeshBasicMaterial({ color: this.glowColor, transparent: true, opacity: 0.5 });
-        const glow = new THREE.Mesh(geometry, glowMaterial);
-
-        this.glowRef.current = glow;
-
-        point.position.set(-cords.x, cords.y, -cords.z);
-        glow.position.set(-cords.x, cords.y, -cords.z);
-
-        this.groupRef.add(point);
-        this.groupRef.add(glow);
-
         groups.markers.add(this.groupRef);
-    }
-
-    getGroup() {
-        return this.groupRef;
     }
 
     componentWillUnmount() {
@@ -47,26 +49,8 @@ class Marker extends Component {
             this.setPosition();
         }
         if (this.props.geometry !== prevProps.geometry || this.props.material !== prevProps.material) {
-            this.createPoint(new THREE.Color(this.pointColor));
-            this.createGlow(new THREE.Color(this.glowColor));
-        }
-    }
-
-    startAnimation() {
-        if (this.glowRef.current) {
-            this.isAnimating = true;
-            this.animate();
-        }
-    }
-    
-    stopAnimation() {
-        this.isAnimating = false;
-    }
-
-    animate() {
-        if (this.isAnimating) {
-            this.animateGlow();
-            requestAnimationFrame(this.animate.bind(this));
+            this.createPoint();
+            this.createGlow();
         }
     }
 
@@ -77,40 +61,48 @@ class Marker extends Component {
         textures.markerLabels.push(texture);
 
         const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
-        const sprite = new THREE.Sprite(material);
-        sprite.scale.set(40, 20, 1);
-        sprite.center.x = 0.25;
-        sprite.translateY(2);
+        this.label = new THREE.Sprite(material);
+        this.label.scale.set(40, 20, 1);
+        this.label.center.x = 0.25;
+        this.label.translateY(2);
 
-        elements.markerLabel.push(sprite);
-        return sprite;
+        this.groupRef.add(this.label);
+        elements.markerLabel.push(this.label);
     }
 
-    createPoint(pointColorThree) {
-        const point = new THREE.Mesh(this.props.geometry, this.props.material);
-        point.material.color.set(pointColorThree);
-        return point;
+    createPoint() {
+        this.point = new THREE.Mesh(this.props.geometry, this.props.material);
+        this.point.material.color.set(this.pointColor);
+        this.groupRef.add(this.point);
+        elements.markerPoint.push(this.point);
     }
 
-    createGlow(glowColorThree) {
+    createGlow() {
         const glowMaterial = this.props.material.clone();
-        const glow = new THREE.Mesh(this.props.geometry, glowMaterial);
-        glow.material.color.set(glowColorThree);
-        glow.material.opacity = 0.6;
-        return glow;
+        this.glow = new THREE.Mesh(this.props.geometry, glowMaterial);
+        this.glow.material.color.set(this.glowColor);
+        this.glow.material.opacity = 0.6;
+        this.groupRef.add(this.glow);
+        elements.markerPoint.push(this.glow);
     }
 
     animateGlow() {
-        if (this.glowRef.current && this.isAnimating) {
-            this.glowRef.current.scale.x += 0.025;
-            this.glowRef.current.scale.y += 0.025;
-            this.glowRef.current.scale.z += 0.025;
-            this.glowRef.current.material.opacity -= 0.005;
+        if (!this.isAnimating) {
+            if (Math.random() > 0.99) {
+                this.isAnimating = true;
+            }
+        } else if (this.isAnimating) {
+            this.glow.scale.x += 0.025;
+            this.glow.scale.y += 0.025;
+            this.glow.scale.z += 0.025;
+            this.glow.material.opacity -= 0.005;
 
-            if (this.glowRef.current.scale.x >= 4) {
-                this.glowRef.current.scale.set(1, 1, 1);
-                this.glowRef.current.material.opacity = 0.6;
-                this.stopAnimation();
+            if (this.glow.scale.x >= 4) {
+                this.glow.scale.x = 1;
+                this.glow.scale.y = 1;
+                this.glow.scale.z = 1;
+                this.glow.material.opacity = 0.6;
+                this.glow.isAnimating = false;
             }
         }
     }
@@ -124,7 +116,7 @@ class Marker extends Component {
         const element = document.createElement('canvas');
         const canvas = new fabric.Canvas(element);
 
-        const text = new fabric.Text(this.props.label, {
+        const text = new fabric.Text(this.labelText, {
             left: 0,
             top: 0,
             fill: this.textColor,
@@ -135,8 +127,12 @@ class Marker extends Component {
         return element;
     }
 
+    getGroup() {
+        return this.groupRef;
+    }
+
     render() {
-        return null;
+        return null; // No visual output from this component
     }
 }
 

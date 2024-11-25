@@ -61,7 +61,6 @@ class App extends Component {
 
     update = () => {
         this.animate(this);
-        this.stats.update();
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.update);
