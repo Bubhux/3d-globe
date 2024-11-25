@@ -1,6 +1,6 @@
 // app/components/globe/lines.jsx
 import * as THREE from 'three';
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
+import { MeshLine, MeshLineMaterial } from '~/components/globe/libs/THREE.MeshLine.js';
 
 import { config, groups, elements, countries } from '~/components/globe/utils/config';
 import { getCountry } from '~/components/globe/data/processing';
@@ -26,11 +26,11 @@ class Lines extends THREE.Group {
         this.create();
         this.animate();
         this.createDots();
-        //console.log('Connections Lines Data constructor', connectionsData.connections);
+        //console.log('Class Lines constructor', connectionsData.connections);
     }
 
     changeCountry() {
-        //console.log('Connections Data function changeCountry called');
+        console.log('Class Lines function changeCountry called');
         countries.index++;
 
         if (countries.index >= this.total) {
@@ -49,7 +49,7 @@ class Lines extends THREE.Group {
     }
 
     createDots() {
-        //console.log('Connections Data function createDots called');
+        console.log('Class Lines function createDots called');
         if (!groups.lineDots) {
             groups.lineDots = new THREE.Group();
         }
@@ -59,31 +59,31 @@ class Lines extends THREE.Group {
         if (groups.globe) {
             groups.globe.add(groups.lineDots);
         } else {
-            console.warn("groups.globe n'est pas défini");
+            console.warn("Class Lines function createDots groups.globe is not defined");
         }
     }
 
     animate() {
-        //console.log('Connections Data function animate called');
+        console.log('Class Lines function animate called');
         if (!countries.selected) {
             this.select();
         }
 
-        this.interval = setInterval(
-            () => this.changeCountry(),
-            countries.interval
-        );
+        this.interval = setInterval(() => this.changeCountry(), countries.interval);
     }
 
     select() {
-        //console.log('Connections Data function select called');
+        console.log('Class Lines function select called');
         const next = this.countries[countries.index];
+        console.log('Next Country:', next);
         const selected = groups.lines.getObjectByName(next);
+        console.log('Selected Country:', selected);
         countries.selected = selected;
         countries.selected.visible = true;
     }
 
     create() {
+        console.log('Class Lines function create called');
         const { connections } = connectionsData;
         const { countries } = countriesData;
         //console.log('Connections Data function create "connections":', connections);
@@ -91,6 +91,7 @@ class Lines extends THREE.Group {
 
         for (let i in connections) {
             const start = getCountry(i, countries);
+            console.log('Start Country:', start);
             const group = new THREE.Group();
             group.name = i;
 
@@ -99,6 +100,7 @@ class Lines extends THREE.Group {
                 const line = new Line(start, end);
                 elements.lines.push(line.mesh);
                 group.add(line.mesh);
+                console.log('Line created:', line.mesh);
             }
 
             group.visible = false;
@@ -132,7 +134,7 @@ class Line {
     }
 
     createCurve() {
-        //console.log('Connections Data function createCurve called');
+        console.log('Class Line function createCurve called');
         const { start, end, mid1, mid2 } = getSplineFromCoords(
             this.start.latitude,
             this.start.longitude,
@@ -140,17 +142,21 @@ class Line {
             this.end.longitude,
             this.radius
         );
+        console.log('Creating curve from', start, 'to', end);
+        console.log('Curve points:', start, mid1, mid2, end);
 
         return new THREE.CubicBezierCurve3(start, mid1, mid2, end);
     }
 
     createMaterial() {
-        //console.log('Connections Data function createMaterial called');
-        return new MeshLineMaterial({
+        console.log('Class Line function createMaterial called');
+        const material = new MeshLineMaterial({
             color: config.colors.globeLines,
             transparent: true,
             opacity: 0.45,
         });
+        console.log('Material created:', material);
+        return material;
     }
 }
 

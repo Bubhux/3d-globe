@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import App from './app';
 import Globe from './globe';
 import Lines from './lines';
+import Marker from './marker';
 import Markers from './markers';
 import Points from './points';
 
@@ -14,7 +15,7 @@ import connectionsData from '~/components/globe/data/connections.js';
 import * as THREE from 'three';
 import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
-//import "./main.module.css"
+import "./main.module.css"
 
 
 //console.log("Données de grille :", gridData);
@@ -99,7 +100,7 @@ const Index = () => {
             });
         });
 
-        console.log("Controllers initialized", controllers);
+        //console.log("Controllers initialized", controllers);
 
         app.camera.position.z = config.sizes.globe * 2.85;
         app.camera.position.y = config.sizes.globe * 0;
@@ -113,25 +114,26 @@ const Index = () => {
         const globeInstance = new Globe();
         const globeObject = globeInstance.getObject3D();
         groups.globe.add(globeObject);
-        console.log("Globe instance created and added:", globeInstance);
+        //console.log("Globe instance created and added:", globeInstance);
 
         const points = new Points(gridData);
         groups.globe.add(points.points);
-        console.log("Points instance created:", points);
+        //console.log("Points instance created:", points);
 
         const markers = new Markers(countriesData);
         groups.globe.add(markers.markers);
-        console.log("Markers instance created:", markers);
+        //console.log("Markers instance created:", markers);
 
         const lines = new Lines({ connections: connectionsData.connections });
         groups.globe.add(lines);
-        console.log("Lines instance created:", lines);
+        //console.log("Lines instance created:", lines);
+        console.log('Connections:', connectionsData.connections);
 
         app.scene.add(groups.globe);
 
-        console.log("Globe group:", groups.globe);
-        console.log("Groups:", groups);
-        console.log("Scene setup completed");
+        //console.log("Globe group:", groups.globe);
+        //console.log("Groups:", groups);
+        //console.log("Scene setup completed");
     };
 
     const animate = (app) => {
@@ -143,19 +145,17 @@ const Index = () => {
             }
 
             if (elements.globe) {
-                console.log("Globe is initialized:", elements.globe);
+                //console.log("Globe is initialized:", elements.globe);
                 elements.globe.scale.set(config.scale.globeScale, config.scale.globeScale, config.scale.globeScale);
             } else {
                 console.error("Globe is not initialized.");
             }
 
-            if (elements.lines && elements.lines.length) {
+            if (elements.lines) {
                 elements.lines.forEach(line => {
-                    if (line.material) {
-                        line.material.color.set(config.colors.globeLines);
-                    }
+                    line.material.color.set(config.colors.globeLines);
                 });
-            }
+            }            
 
             groups.map.visible = config.display.map;
             groups.markers.visible = config.display.markers;
@@ -183,16 +183,18 @@ const Index = () => {
 
         if (elements.markers && elements.markers.length) {
             elements.markers.forEach(marker => {
-                if (marker.point && marker.point.material) {
-                    marker.point.material.color.set(config.colors.globeMarkerColor);
+                if (marker instanceof Marker) {
+                    if (marker.point && marker.point.material) {
+                        marker.point.material.color.set(config.colors.globeMarkerColor);
+                    }
+                    if (marker.glow && marker.glow.material) {
+                        marker.glow.material.color.set(config.colors.globeMarkerGlow);
+                    }
+                    if (marker.label && marker.label.material) {
+                        marker.label.material.map.needsUpdate = true;
+                    }
+                    marker.animateGlow && marker.animateGlow();
                 }
-                if (marker.glow && marker.glow.material) {
-                    marker.glow.material.color.set(config.colors.globeMarkerGlow);
-                }
-                if (marker.label && marker.label.material) {
-                    marker.label.material.map.needsUpdate = true;
-                }
-                marker.animateGlow && marker.animateGlow();
             });
         }
 
@@ -205,7 +207,7 @@ const Index = () => {
         }
 
         if (groups.globe) {
-            console.log("Rotating globe");
+            //console.log("Rotating globe");
             groups.globe.rotation.y -= 0.0025;
         } else {
             console.error("groups.globe is not initialized.");
@@ -233,6 +235,10 @@ const Index = () => {
             // Cleanup si nécessaire
         };
     }, []);
+
+    if (data.error) {
+        return <div>Error loading data: {data.error.message}</div>;
+    }
 
     return (
         <div className="app-wrapper">
