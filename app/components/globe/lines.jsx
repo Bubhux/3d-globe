@@ -21,8 +21,10 @@ class Lines extends THREE.Group {
 
         if (!groups.lines) {
             groups.lines = new THREE.Group();
+            //console.log("Lines constructor group added to globe:", groups.lines);
         }
 
+        elements.lines = [];
         this.create();
         this.animate();
         this.createDots();
@@ -30,7 +32,7 @@ class Lines extends THREE.Group {
     }
 
     changeCountry() {
-        console.log('Class Lines function changeCountry called');
+        //console.log('Class Lines function changeCountry called');
         countries.index++;
 
         if (countries.index >= this.total) {
@@ -49,7 +51,7 @@ class Lines extends THREE.Group {
     }
 
     createDots() {
-        console.log('Class Lines function createDots called');
+        //console.log('Class Lines function createDots called');
         if (!groups.lineDots) {
             groups.lineDots = new THREE.Group();
         }
@@ -64,7 +66,7 @@ class Lines extends THREE.Group {
     }
 
     animate() {
-        console.log('Class Lines function animate called');
+        //console.log('Class Lines function animate called');
         if (!countries.selected) {
             this.select();
         }
@@ -73,17 +75,17 @@ class Lines extends THREE.Group {
     }
 
     select() {
-        console.log('Class Lines function select called');
+        //console.log('Class Lines function select called');
         const next = this.countries[countries.index];
-        console.log('Next Country:', next);
+        //console.log('Next Country:', next);
         const selected = groups.lines.getObjectByName(next);
-        console.log('Selected Country:', selected);
+        //console.log('Selected Country:', selected);
         countries.selected = selected;
         countries.selected.visible = true;
     }
 
     create() {
-        console.log('Class Lines function create called');
+        //console.log('Class Lines function create called');
         const { connections } = connectionsData;
         const { countries } = countriesData;
         //console.log('Connections Data function create "connections":', connections);
@@ -91,7 +93,7 @@ class Lines extends THREE.Group {
 
         for (let i in connections) {
             const start = getCountry(i, countries);
-            console.log('Start Country:', start);
+            //console.log('Start Country:', start);
             const group = new THREE.Group();
             group.name = i;
 
@@ -100,11 +102,13 @@ class Lines extends THREE.Group {
                 const line = new Line(start, end);
                 elements.lines.push(line.mesh);
                 group.add(line.mesh);
-                console.log('Line created:', line.mesh);
+                //console.log('Line created:', line.mesh);
             }
 
             group.visible = false;
             groups.lines.add(group);
+            //console.log("Lines function create group added to globe:", groups.lines);
+            //console.log('Elements lines populated:', elements.lines);
         }
     }
 }
@@ -134,7 +138,7 @@ class Line {
     }
 
     createCurve() {
-        console.log('Class Line function createCurve called');
+        //console.log('Class Line function createCurve called');
         const { start, end, mid1, mid2 } = getSplineFromCoords(
             this.start.latitude,
             this.start.longitude,
@@ -142,20 +146,20 @@ class Line {
             this.end.longitude,
             this.radius
         );
-        console.log('Creating curve from', start, 'to', end);
-        console.log('Curve points:', start, mid1, mid2, end);
+        //console.log('Creating curve from', start, 'to', end);
+        //console.log('Curve points:', start, mid1, mid2, end);
 
         return new THREE.CubicBezierCurve3(start, mid1, mid2, end);
     }
 
     createMaterial() {
-        console.log('Class Line function createMaterial called');
+        //console.log('Class Line function createMaterial called');
         const material = new MeshLineMaterial({
             color: config.colors.globeLines,
             transparent: true,
             opacity: 0.45,
         });
-        console.log('Material created:', material);
+        //console.log('Material created:', material);
         return material;
     }
 }

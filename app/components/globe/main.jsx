@@ -127,7 +127,7 @@ const Index = () => {
         const lines = new Lines({ connections: connectionsData.connections });
         groups.globe.add(lines);
         //console.log("Lines instance created:", lines);
-        console.log('Connections:', connectionsData.connections);
+        //console.log('Connections:', connectionsData.connections);
 
         app.scene.add(groups.globe);
 
@@ -153,9 +153,11 @@ const Index = () => {
 
             if (elements.lines) {
                 elements.lines.forEach(line => {
+                    console.log("Line visibility:", line.visible);
                     line.material.color.set(config.colors.globeLines);
                 });
-            }            
+                console.log("Elements lines:", elements.lines);
+            }
 
             groups.map.visible = config.display.map;
             groups.markers.visible = config.display.markers;
@@ -207,6 +209,7 @@ const Index = () => {
         }
 
         if (groups.globe) {
+            groups.globe.add(groups.lines);
             //console.log("Rotating globe");
             groups.globe.rotation.y -= 0.0025;
         } else {

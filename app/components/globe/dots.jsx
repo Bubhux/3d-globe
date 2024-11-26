@@ -9,15 +9,18 @@ class Dots extends THREE.Group {
         this.total = config.dots.total;
         this.name = 'LineDots';
 
+        groups.lineDots = new THREE.Group();
+        groups.lineDots.name = 'LineDots';
         this.create();
     }
 
     create() {
-        for (let i = 0; i < config.dots.total; i++) {
+        for (let i = 0; i < this.total; i++) {
             const dot = new Dot();
-            this.add(dot.mesh);
+            groups.lineDots.add(dot.mesh);
             elements.lineDots.push(dot);
         }
+        this.add(groups.lineDots);
     }
 }
 
