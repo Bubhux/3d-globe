@@ -113,21 +113,32 @@ const Index = () => {
 
         const globeInstance = new Globe();
         const globeObject = globeInstance.getObject3D();
-        groups.globe.add(globeObject);
-        //console.log("Globe instance created and added:", globeInstance);
+        if (globeObject) {
+            groups.globe.add(globeObject);
+        } else {
+            console.error("globeObject is not initialized");
+        }
 
         const points = new Points(gridData);
-        groups.globe.add(points.points);
-        //console.log("Points instance created:", points);
+        if (points && points.points) {
+            groups.globe.add(points.points);
+        } else {
+            console.error("points are not initialized");
+        }
 
         const markers = new Markers(countriesData);
-        groups.globe.add(markers.markers);
-        //console.log("Markers instance created:", markers);
+        if (markers && markers.markers) {
+            groups.globe.add(markers.markers);
+        } else {
+            console.error("markers are not initialized");
+        }
 
         const lines = new Lines({ connections: connectionsData.connections });
-        groups.globe.add(lines);
-        //console.log("Lines instance created:", lines);
-        //console.log('Connections:', connectionsData.connections);
+        if (lines) {
+            groups.globe.add(lines);
+        } else {
+            console.error("lines are not initialized");
+        }
 
         app.scene.add(groups.globe);
 
@@ -208,9 +219,18 @@ const Index = () => {
             groups.globe.rotation.y -= 0.0025;
         }
 
+        if (!groups.lines) {
+            groups.lines = new THREE.Group();
+        }
+
         if (groups.globe) {
-            groups.globe.add(groups.lines);
-            //console.log("Rotating globe");
+            if (groups.lines) {
+                groups.globe.add(groups.lines);
+                //console.log("Added lines to globe", groups.lines);
+            } else {
+                console.error("groups.lines is not initialized.");
+            }
+
             groups.globe.rotation.y -= 0.0025;
         } else {
             console.error("groups.globe is not initialized.");
