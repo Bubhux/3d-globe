@@ -21,10 +21,8 @@ class Lines extends THREE.Group {
 
         if (!groups.lines) {
             groups.lines = new THREE.Group();
-            //console.log("Lines constructor group added to globe:", groups.lines);
         }
 
-        elements.lines = [];
         this.create();
         this.animate();
         this.createDots();
@@ -107,8 +105,6 @@ class Lines extends THREE.Group {
 
             group.visible = false;
             groups.lines.add(group);
-            //console.log("Lines function create group added to globe:", groups.lines);
-            //console.log('Elements lines populated:', elements.lines);
         }
     }
 }
