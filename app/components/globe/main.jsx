@@ -215,8 +215,11 @@ const Index = () => {
         //console.log("elements.lines:", elements.lines);
         //console.log("elements.markers:", elements.markers);
 
-        if (animations.rotateGlobe) {
+        if (groups.globe) {
+            //groups.globe.add(groups.atmosphere);
             groups.globe.rotation.y -= 0.0025;
+        } else {
+            console.error("groups.globe is not initialized.");
         }
 
         if (!groups.lines) {
@@ -231,7 +234,6 @@ const Index = () => {
                 console.error("groups.lines is not initialized.");
             }
 
-            groups.globe.rotation.y -= 0.0025;
         } else {
             console.error("groups.globe is not initialized.");
         }

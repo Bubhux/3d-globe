@@ -30,7 +30,6 @@ class Globe extends Component {
         if (this.props.scene) {
             this.props.scene.remove(groups.globe);
         }
-        // Dispose geometry if it's no longer needed
     }
 
     init() {
@@ -69,12 +68,13 @@ class Globe extends Component {
 
         groups.atmosphere.add(atmosphere);
         groups.globe.add(groups.atmosphere);
+        console.log("Function initAtmosphere:", groups.globe);
     }
 
     createGlobeMaterial() {
         const texture = this.props.loader.load(
             config.urls.globeTexture,
-            () => this.props.setIsLoading(false), 
+            () => this.props.setIsLoading(false),
             undefined,
             (error) => {
                 console.error('Erreur de chargement de la texture', error);
@@ -92,6 +92,7 @@ class Globe extends Component {
     }
 
     createGlobeAtmosphere() {
+        console.log('Class Globe function createGlobeAtmosphere called');
         return new THREE.ShaderMaterial({
             vertexShader: shaders.atmosphere.vertexShader,
             fragmentShader: shaders.atmosphere.fragmentShader,
