@@ -216,7 +216,7 @@ const Index = () => {
         //console.log("elements.markers:", elements.markers);
 
         if (groups.globe) {
-            //groups.globe.add(groups.atmosphere);
+            groups.globe.add(groups.atmosphere);
             groups.globe.rotation.y -= 0.0025;
         } else {
             console.error("groups.globe is not initialized.");

@@ -11,6 +11,7 @@ class Globe extends Component {
         this.radius = config.sizes.globe;
         this.mesh = null;
         this.group = new THREE.Group();
+        this.noiseGenerator = new NoiseGenerator();
     }
 
     componentDidMount() {
@@ -93,18 +94,50 @@ class Globe extends Component {
 
     createGlobeAtmosphere() {
         console.log('Class Globe function createGlobeAtmosphere called');
+
+        // Créer une texture de bruit de Perlin
+        const noiseTexture = this.generateNoiseTexture();
+
         return new THREE.ShaderMaterial({
+            uniforms: {
+                noiseTexture: { value: noiseTexture },
+                opacity: { value: 0.5 } // Ajuste l'opacité pour le halo
+            },
             vertexShader: shaders.atmosphere.vertexShader,
             fragmentShader: shaders.atmosphere.fragmentShader,
             blending: THREE.AdditiveBlending,
             side: THREE.BackSide,
             transparent: true,
-            uniforms: {},
         });
     }
 
+    generateNoiseTexture() {
+        console.log('Class Globe function generateNoiseTexture called');
+        const size = 256; // Taille de la texture
+        const data = new Uint8Array(size * size * 4);
+        const noiseScale = 0.5; // Ajuste l'échelle du bruit
+
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const value = this.noiseGenerator.simplex2(x * noiseScale, y * noiseScale);
+                const colorValue = Math.floor((value + 1) * 128); // Normalise le bruit à [0, 255]
+
+                const index = (x + y * size) * 4;
+                data[index] = colorValue;     // R
+                data[index + 1] = colorValue; // G
+                data[index + 2] = colorValue; // B
+                data[index + 3] = 255;        // A
+            }
+        }
+
+        const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+        texture.needsUpdate = true;
+
+        return texture;
+    }
+
     render() {
-        return null; // Pas de rendu pour ce composant
+        return null;
     }
 }
 

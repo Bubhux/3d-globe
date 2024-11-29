@@ -1,8 +1,8 @@
 // app/components/globe/shaders.js
 export const shaders = {
-    atmosphere: {},
-    globe: {},
-    dot: {}
+	atmosphere: {},
+	globe: {},
+	dot: {}
 }
 
 shaders.globe.vertexShader = `
@@ -37,10 +37,13 @@ shaders.atmosphere.vertexShader = `
 
 shaders.atmosphere.fragmentShader = `
 	varying vec3 vNormal;
+
 	void main() 
 	{
-		float intensity = pow( 0.7 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), 4.0 ); 
-	    gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 ) * intensity;
+		float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.0); 
+		vec4 color = vec4(1.0, 1.0, 1.0, 1.0) * intensity;
+		color.a = 1.0 - smoothstep(0.0, 0.5, intensity);
+		gl_FragColor = color;
 	}
 `
 
