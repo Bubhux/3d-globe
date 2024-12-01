@@ -14,6 +14,7 @@ class Globe extends Component {
         this.group = new THREE.Group();
         this.noiseGenerator = new NoiseGenerator();
         this.noiseTexture = null;
+        this.globeMaterial = null;
     }
 
     componentDidMount() {
@@ -43,7 +44,11 @@ class Globe extends Component {
         const time = performance.now() * 0.001; // Temps en secondes
 
         if (this.noiseTexture) {
-            this.updateNoiseTexture(time); // Mettre à jour la texture de bruit
+            this.updateNoiseTexture(time);
+        }
+
+        if (this.globeMaterial && this.globeMaterial.uniforms && this.globeMaterial.uniforms.time) {
+            this.globeMaterial.uniforms.time.value = time;
         }
 
         this.animationId = requestAnimationFrame(() => this.animate());
@@ -61,9 +66,9 @@ class Globe extends Component {
     }
 
     initGlobe(geometry) {
+        this.globeMaterial = this.createGlobeMaterial();
         const scale = config.scale.globeScale;
-        const globeMaterial = this.createGlobeMaterial();
-        const globe = new THREE.Mesh(geometry, globeMaterial);
+        const globe = new THREE.Mesh(geometry, this.globeMaterial);
         globe.scale.set(scale, scale, scale);
         elements.globe = globe;
 
@@ -91,7 +96,10 @@ class Globe extends Component {
     createGlobeMaterial() {
         const texture = this.props.loader.load(
             config.urls.globeTexture,
-            () => this.props.setIsLoading(false),
+            () => {
+                this.props.setIsLoading(false);
+                this.animate();
+            },
             undefined,
             (error) => {
                 console.error('Erreur de chargement de la texture', error);
@@ -99,25 +107,27 @@ class Globe extends Component {
             }
         );
 
-        return new THREE.ShaderMaterial({
+        const material = new THREE.ShaderMaterial({
             uniforms: { texture: { value: texture } },
             vertexShader: shaders.globe.vertexShader,
             fragmentShader: shaders.globe.fragmentShader,
             blending: THREE.AdditiveBlending,
             transparent: true,
         });
+
+        return material;
     }
 
     createGlobeAtmosphere() {
         console.log('Class Globe function createGlobeAtmosphere called');
 
-        // Créer une texture de bruit de Perlin
         this.noiseTexture = this.generateNoiseTexture(performance.now() * 0.001);
 
         return new THREE.ShaderMaterial({
             uniforms: {
                 noiseTexture: { value: this.noiseTexture },
-                opacity: { value: 0.5 } // Ajuste l'opacité pour le halo
+                opacity: { value: 0.9 }, // Augmente l'opacité pour le halo
+                time: { value: 0 }
             },
             vertexShader: shaders.atmosphere.vertexShader,
             fragmentShader: shaders.atmosphere.fragmentShader,
@@ -130,7 +140,7 @@ class Globe extends Component {
     generateNoiseTexture(time) {
         const size = 256;
         const data = new Uint8Array(size * size * 4);
-        const noiseScale = 0.15; // Augmente la fréquence du bruit pour un effet granuleux
+        const noiseScale = 0.01; // Réduit la fréquence du bruit pour un effet plus granuleux
         const z = 0.5;
 
         const centerX = size / 2;
@@ -139,23 +149,20 @@ class Globe extends Component {
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
-                // Calculer la distance du pixel au centre
                 const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-                const normalizedDistance = distance / maxDistance; // Normaliser la distance entre 0 et 1
+                const normalizedDistance = distance / maxDistance;
 
-                // Oscillation temporelle pour effet de pulsation
-                const pulseEffect = 0.5 + 0.5 * Math.sin(time * 2 + normalizedDistance * 5); // Effet de pulsation
+                // Effet de pulsation plus prononcé
+                const pulseEffect = 0.5 + 0.5 * Math.sin(time * 3 + normalizedDistance * 20); // Accélère l'effet de pulsation
 
-                // Augmente l'effet de bruit basé sur la distance
                 const noiseValue = this.noiseGenerator.simplex3(x * noiseScale, y * noiseScale, z);
-                const value = (noiseValue + 1) * 0.5; // Normaliser entre 0 et 1
-                const colorValue = Math.floor(value * 255 * pulseEffect); // Applique l'effet de pulsation
+                const value = (noiseValue + 1) * 0.5;
+                const colorValue = Math.floor(value * 255 * pulseEffect);
 
                 const index = (x + y * size) * 4;
-                // Accentue le bleu ciel et réduire l'intensité des autres couleurs
-                data[index] = Math.min(colorValue * 0.7 + 80, 255);  // R : Accentuer le bleu
-                data[index + 1] = Math.min(colorValue * 0.5 + 20, 255); // G : Légère réduction
-                data[index + 2] = Math.min(colorValue * 0.9, 255); // B : Accentue le bleu
+                data[index] = Math.min(colorValue * 1.0 + 100, 255);  // Accentue le rouge
+                data[index + 1] = Math.min(colorValue * 0.9 + 40, 255); // Accentue le vert
+                data[index + 2] = Math.min(colorValue * 1.2, 255); // Accentue le bleu
                 data[index + 3] = 255; // Opaque
             }
         }
@@ -169,7 +176,7 @@ class Globe extends Component {
     updateNoiseTexture(time) {
         const size = 256;
         const data = new Uint8Array(size * size * 4);
-        const noiseScale = 0.15; // Assure que cela correspond à ce qui a été utilisé lors de la création
+        const noiseScale = 0.1; // Assure que cela correspond à ce qui a été utilisé lors de la création
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
@@ -177,7 +184,7 @@ class Globe extends Component {
                 const pulseEffect = 0.5 + 0.5 * Math.sin(time * 2 + normalizedDistance * 5);
 
                 const noiseValue = this.noiseGenerator.simplex3(x * noiseScale, y * noiseScale, 0.5);
-                const value = (noiseValue + 1) * 0.5; // Normaliser entre 0 et 1
+                const value = (noiseValue + 1) * 0.5; // Normalise entre 0 et 1
                 const colorValue = Math.floor(value * 255 * pulseEffect);
 
                 const index = (x + y * size) * 4;

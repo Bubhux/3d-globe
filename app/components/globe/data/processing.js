@@ -17,7 +17,8 @@ export const NorthAmerica = [
     'Mexico',
     'United States',
     'Greenland',
-    'Iceland'
+    'Iceland',
+    'Canada'
 ]
 
 export const Europe = [
@@ -31,7 +32,8 @@ export const Europe = [
     'Italy',
     'Ukraine',
     'Denmark',
-    'Romania'
+    'Romania',
+    'France'
 ]
 
 export const Africa = [
@@ -64,7 +66,12 @@ export const Asia = [
     'Cambodia',
     'Vietnam',
     'Singapore',
-    'Indonesia'
+    'Indonesia',
+    'Japan',
+    'China',
+    'Malaysia',
+    'Russia',
+    'South Korea'
 ]
 
 export const Rest = [
@@ -75,7 +82,8 @@ export const Rest = [
     'Nauru',
     'Solomon Islands',
     'Kiribati',
-    'Tuvalu'
+    'Tuvalu',
+    'Antarctica'
 ]
 
 export const selected = [
@@ -104,7 +112,8 @@ export const connections = {
     'India': ['Pakistan', 'Kazakhstan', 'Maldives', 'Sri Lanka', 'Vietnam', 'Thailand'],
     'Thailand': ['Singapore', 'Indonesia', 'Nepal', 'Vietnam', 'Sri Lanka', 'Cambodia', 'Pakistan'],
     'Panama': ['Cuba', 'Mexico', 'Ecuador', 'Colombia', 'Peru', 'Venezuela, RB', 'United States'],
-    'Fiji': ['Tuvalu', 'Nauru', 'Kiribati', 'Tonga', 'New Caledonia', 'New Zealand']
+    'Fiji': ['Tuvalu', 'Nauru', 'Kiribati', 'Tonga', 'New Caledonia', 'New Zealand'],
+    'France': ["Germany", "Spain", "Italy", "Norway"],
 }
 
 export function getCountries(connections, countries) {
