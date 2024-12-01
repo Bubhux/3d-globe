@@ -60,7 +60,16 @@ data.countries = [
     { "name": "Nauru", "latitude": "-0.5477", "longitude": "166.920867" },
     { "name": "Solomon Islands", "latitude": "-9.42676", "longitude": "159.949" },
     { "name": "Kiribati", "latitude": "1.32905", "longitude": "172.979" },
-    { "name": "Tuvalu", "latitude": "-8.6314877", "longitude": "179.089567" }
+    { "name": "Tuvalu", "latitude": "-8.6314877", "longitude": "179.089567" },
+    { "name": "Japan", "latitude": "35.6762", "longitude": "139.6503" },
+    { "name": "China", "latitude": "35.8617", "longitude": "104.1954" },
+    { "name": "Malaysia", "latitude": "4.2105", "longitude": "101.9758" },
+    { "name": "France", "latitude": "48.8566", "longitude": "2.3522" },
+    { "name": "Russia", "latitude": "55.7558", "longitude": "37.6173" },
+    { "name": "Canada", "latitude": "56.1304", "longitude": "-106.3468" },
+    { "name": "South Korea", "latitude": "35.9078", "longitude": "127.7669" },
+    { "name": "Caribbean", "latitude": "15.0", "longitude": "-62.0" },
+    { "name": "Antarctica", "latitude": "-90.0", "longitude": "0.0" }
 ];
 
 export default data;

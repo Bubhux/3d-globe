@@ -31,35 +31,38 @@ shaders.atmosphere.vertexShader = `
 	varying vec3 vNormal;
 	void main() {
 		vNormal = normalize( normalMatrix * normal );
-		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.2 );
 	}
 `
 
 shaders.atmosphere.fragmentShader = `
 	varying vec3 vNormal;
+	uniform float time;
 
 	void main() 
 	{
-		float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.0); 
+		float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 0.5)), 3.0); 
 		intensity = max(0.0, intensity);
 
-		// Dégradé de couleur : accentuer le bleu à la base
+		// Effet de vagues plus visible
+		float waveEffect = 0.15 * sin(gl_FragCoord.x * 0.1 + (gl_FragCoord.y + time * 2.0) * 0.1);
+		
 		vec4 color;
 		if (intensity < 0.5) {
-			color = mix(vec4(0.5, 0.8, 1.0, 1.0), vec4(0.8, 0.8, 0.8, 1.0), intensity * 2.0); // Dégradé bleu ciel vers gris
+			// Couleur de base bleu ciel clair accentuée
+			color = mix(vec4(0.6 + waveEffect, 0.9, 1.0, 1.0), vec4(0.8, 0.8, 0.8, 1.0), intensity * 2.0); 
 		} else {
-			color = mix(vec4(0.8, 0.8, 0.8, 1.0), vec4(1.0, 1.0, 1.0, 1.0), (intensity - 0.5) * 2.0); // Dégradé gris vers blanc
+			// Dégradé vers le blanc pur
+			color = mix(vec4(0.8, 0.8, 0.8, 1.0), vec4(1.0, 1.0, 1.0, 1.0), (intensity - 0.5) * 2.0); 
 		}
 
-		// Appliquer l'intensité au dégradé de couleur
 		color *= intensity;
 
-		// Définir l'alpha pour créer une transition douce
 		color.a = 1.0 - smoothstep(0.0, 0.5, intensity);
+		
 		gl_FragColor = color;
 	}
-`;
-
+`
 
 shaders.dot.vertexShader = `
 	attribute float size;
