@@ -28,6 +28,10 @@ class App extends Component {
 
         this.render();
         this.update();
+
+        // Configure le resize dynamique dès le début
+        window.addEventListener('resize', this.handleResize);
+        this.handleResize();  // Appelle immédiatement pour la taille initiale
     }
 
     initScene = () => {
@@ -74,9 +78,21 @@ class App extends Component {
     }
 
     handleResize = () => {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        const aspectRatio = window.innerWidth / window.innerHeight;
+
+        // Met à jour la caméra
+        this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Met à jour la taille du renderer avec le ratio dynamique
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight * 1.0;
+        this.renderer.setSize(newWidth, newHeight);
+    }
+
+    componentWillUnmount() {
+        // Supprime les écouteurs d'événements pour éviter les fuites mémoire
+        window.removeEventListener('resize', this.handleResize);
     }
 }
 

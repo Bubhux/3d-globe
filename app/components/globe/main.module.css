@@ -16,6 +16,10 @@ html {
 
 canvas {
     vertical-align: top;
+    width: 100% !important; /* Ajuste la largeur à 100% du conteneur */
+    height: auto !important; /* Maintient le rapport hauteur/largeur */
+    max-width: 100vw; /* Limite la largeur maximale à celle de la fenêtre */
+    max-height: 100vh; /* Limite la hauteur maximale à celle de la fenêtre */
 }
 
 .dg.a {
