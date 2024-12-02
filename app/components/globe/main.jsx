@@ -150,13 +150,24 @@ const Index = () => {
     const animate = (app) => {
         //console.log("Animating app...");
         if (controls.changed) {
+            const updateMaterial = (element, property, value) => {
+                if (element) {
+                    element.material[property] = value;
+                }
+            };
+
+            const updateVisibility = (elements, visible) => {
+                elements.forEach(element => {
+                    if (element) element.visible = visible;
+                });
+            };
+
             if (elements.globePoints) {
-                elements.globePoints.material.size = config.sizes.globeDotSize;
+                updateMaterial(elements.globePoints, 'size', config.sizes.globeDotSize);
                 elements.globePoints.material.color.set(config.colors.globeDotColor);
             }
 
             if (elements.globe) {
-                //console.log("Globe is initialized:", elements.globe);
                 elements.globe.scale.set(config.scale.globeScale, config.scale.globeScale, config.scale.globeScale);
             } else {
                 console.error("Globe is not initialized.");
@@ -164,23 +175,18 @@ const Index = () => {
 
             if (elements.lines) {
                 elements.lines.forEach(line => {
-                    console.log("Line visibility:", line.visible);
                     line.material.color.set(config.colors.globeLines);
                 });
-                console.log("Elements lines:", elements.lines);
+                //console.log("Elements lines:", elements.lines);
             }
 
-            groups.map.visible = config.display.map;
-            groups.markers.visible = config.display.markers;
-            groups.points.visible = config.display.points;
-
-            elements.markerLabel.forEach(label => {
-                label.visible = config.display.markerLabel;
+            [groups.map, groups.markers, groups.points].forEach((group, index) => {
+                const configKeys = ['map', 'markers', 'points'];
+                if (group) group.visible = config.display[configKeys[index]];
             });
 
-            elements.markerPoint.forEach(point => {
-                point.visible = config.display.markerPoint;
-            });
+            updateVisibility(elements.markerLabel, config.display.markerLabel);
+            updateVisibility(elements.markerPoint, config.display.markerPoint);
 
             setControls(prevControls => ({ ...prevControls, changed: false }));
         }
@@ -215,34 +221,20 @@ const Index = () => {
         //console.log("elements.lines:", elements.lines);
         //console.log("elements.markers:", elements.markers);
 
-        if (groups.globe) {
-            groups.globe.add(groups.atmosphere);
+        // Vérifie si globe est initialisé et journalise une erreur si non
+        if (!groups.globe) {
+            //console.error("groups.globe is not initialized.");
+        } else {
+            // Ajoute atmosphere et lines à globe si elles sont initialisées
+            groups.globe.add(groups.atmosphere || new THREE.Group());
+            groups.globe.add(groups.lines || new THREE.Group());
             groups.globe.rotation.y -= 0.0025;
-        } else {
-            console.error("groups.globe is not initialized.");
-        }
 
-        if (!groups.lines) {
-            groups.lines = new THREE.Group();
-        }
-
-        if (groups.globe) {
-            if (groups.lines) {
-                groups.globe.add(groups.lines);
-                //console.log("Added lines to globe", groups.lines);
-            } else {
-                console.error("groups.lines is not initialized.");
+            // Vérifie l'initialisation de renderer et globe avant de continuer
+            if (!app.renderer) {
+                //console.error("Renderer is not initialized.");
             }
-
-        } else {
-            console.error("groups.globe is not initialized.");
         }
-
-        if (!app.renderer || !groups.globe) {
-            console.error("Renderer or globe group is not initialized.");
-            return;
-        }
-
         app.renderer.render(app.scene, app.camera);
     };
 
