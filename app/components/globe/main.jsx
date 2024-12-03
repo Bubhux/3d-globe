@@ -18,13 +18,9 @@ import { config, elements, groups, animations } from '~/components/globe/utils/c
 import "./main.module.css"
 
 
-//console.log("Données de grille :", gridData);
-//console.log("Données des pays :", countriesData);
-//console.log("Données des connexions :", connectionsData);
-
 const Index = () => {
     console.log("Main component loaded");
-    const [controls, setControls] = useState({ changed: false });
+    const [controls, setControls] = useState({ changed: true });
     const [data, setData] = useState({ grid: [], countries: [], connections: [] });
     const [isLoading, setIsLoading] = useState(true);
     const appRef = useRef();
@@ -216,10 +212,6 @@ const Index = () => {
                 }
             });
         }
-
-        //console.log("elements.globePoints:", elements.globePoints);
-        //console.log("elements.lines:", elements.lines);
-        //console.log("elements.markers:", elements.markers);
 
         // Vérifie si globe est initialisé et journalise une erreur si non
         if (!groups.globe) {

@@ -12,8 +12,8 @@ class App extends Component {
         this.animate = props.animate;
         this.setup = props.setup;
         this.guiRef = null;
-        window.app = this;
         this.init();
+        window.app = this;
     }
 
     init = async () => {
