@@ -19,7 +19,7 @@ import "./main.module.css"
 
 
 const Index = () => {
-    console.log("Main component loaded");
+    //console.log("Main component loaded");
     const [controls, setControls] = useState({ changed: true });
     const [data, setData] = useState({ grid: [], countries: [], connections: [] });
     const [isLoading, setIsLoading] = useState(true);
@@ -176,11 +176,6 @@ const Index = () => {
                 //console.log("Elements lines:", elements.lines);
             }
 
-            [groups.map, groups.markers, groups.points].forEach((group, index) => {
-                const configKeys = ['map', 'markers', 'points'];
-                if (group) group.visible = config.display[configKeys[index]];
-            });
-
             updateVisibility(elements.markerLabel, config.display.markerLabel);
             updateVisibility(elements.markerPoint, config.display.markerPoint);
 
@@ -220,13 +215,17 @@ const Index = () => {
             // Ajoute atmosphere et lines à globe si elles sont initialisées
             groups.globe.add(groups.atmosphere || new THREE.Group());
             groups.globe.add(groups.lines || new THREE.Group());
-            groups.globe.rotation.y -= 0.0025;
 
             // Vérifie l'initialisation de renderer et globe avant de continuer
             if (!app.renderer) {
                 //console.error("Renderer is not initialized.");
             }
         }
+
+        if (animations.rotateGlobe) {
+            groups.globe.rotation.y -= 0.0025;
+        }
+
         app.renderer.render(app.scene, app.camera);
     };
 
