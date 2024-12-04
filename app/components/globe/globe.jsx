@@ -90,11 +90,12 @@ class Globe extends Component {
 
         groups.atmosphere.add(atmosphere);
         groups.globe.add(groups.atmosphere);
-        console.log("Function initAtmosphere:", groups.globe);
+        //console.log("Function initAtmosphere:", groups.globe);
     }
 
     createGlobeMaterial() {
-        const texture = this.props.loader.load(
+        const textureLoader = new THREE.TextureLoader();
+        const texture = textureLoader.load(
             config.urls.globeTexture,
             () => {
                 this.props.setIsLoading(false);
@@ -107,19 +108,18 @@ class Globe extends Component {
             }
         );
 
-        const material = new THREE.ShaderMaterial({
-            uniforms: { texture: { value: texture } },
-            vertexShader: shaders.globe.vertexShader,
-            fragmentShader: shaders.globe.fragmentShader,
-            blending: THREE.AdditiveBlending,
-            transparent: true,
+        console.log('Texture chargée', config.urls.globeTexture);
+
+        const material = new THREE.MeshStandardMaterial({
+            map: texture,
+            //transparent: false,
         });
 
         return material;
     }
 
     createGlobeAtmosphere() {
-        console.log('Class Globe function createGlobeAtmosphere called');
+        //console.log('Class Globe function createGlobeAtmosphere called');
 
         this.noiseTexture = this.generateNoiseTexture(performance.now() * 0.001);
 
