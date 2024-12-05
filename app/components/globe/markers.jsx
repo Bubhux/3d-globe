@@ -7,7 +7,7 @@ import { config, groups, elements } from '~/components/globe/utils/config';
 import Marker from './Marker';
 
 
-class Markers extends Component {
+class Markers extends THREE.Group {
     constructor(props) {
         super(props);
         const { countries = [], markerRadius = 2 } = props;
