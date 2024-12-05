@@ -7,7 +7,7 @@ import { toSphereCoordinates } from '~/components/globe/utils/utils';
 import { config, groups, elements } from '~/components/globe/utils/config';
 
 
-class Points extends Component {
+class Points extends THREE.Group {
     constructor(props) {
         super(props);
 

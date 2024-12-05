@@ -116,15 +116,15 @@ const Index = () => {
         }
 
         const points = new Points(gridData);
-        if (points && points.points) {
-            groups.globe.add(points.points);
+        if (points) {
+            groups.globe.add(points);
         } else {
             console.error("points are not initialized");
         }
 
         const markers = new Markers(countriesData);
-        if (markers && markers.markers) {
-            groups.globe.add(markers.markers);
+        if (markers) {
+            groups.globe.add(markers);
         } else {
             console.error("markers are not initialized");
         }
@@ -176,6 +176,11 @@ const Index = () => {
                 //console.log("Elements lines:", elements.lines);
             }
 
+            [groups.markers, groups.points].forEach((group, index) => {
+                const configKeys = ['markers', 'points'];
+                if (group) group.visible = config.display[configKeys[index]];
+            });
+
             updateVisibility(elements.markerLabel, config.display.markerLabel);
             updateVisibility(elements.markerPoint, config.display.markerPoint);
 
@@ -215,6 +220,8 @@ const Index = () => {
             // Ajoute atmosphere et lines à globe si elles sont initialisées
             groups.globe.add(groups.atmosphere || new THREE.Group());
             groups.globe.add(groups.lines || new THREE.Group());
+            groups.globe.add(groups.markers || new THREE.Group());
+            groups.globe.add(groups.points || new THREE.Group());
 
             // Vérifie l'initialisation de renderer et globe avant de continuer
             if (!app.renderer) {

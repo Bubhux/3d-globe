@@ -108,7 +108,7 @@ class Globe extends Component {
             }
         );
 
-        console.log('Texture chargée', config.urls.globeTexture);
+        //console.log('Texture chargée', config.urls.globeTexture);
 
         const material = new THREE.MeshStandardMaterial({
             map: texture,
