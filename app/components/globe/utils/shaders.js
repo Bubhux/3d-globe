@@ -34,17 +34,21 @@ shaders.globe.fragmentShader = `
 	varying vec2 vUv;
 
 	void main() {
-		// Extraction des couleurs de la texture selon les UV
-		vec3 diffuse = texture2D( texture, vUv ).xyz;
+		// Calcul de l'intensité pour l'effet de bord basé sur la normale
+		float intensity = 1.05 - dot(normalize(vNormal), vec3(0.0, 0.0, 1.0));
 
-		// Calcul de l'intensité pour l'effet atmosphérique en fonction de l'orientation de la normale
-		float intensity = 1.05 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) );
+		// S'assurer que l'intensité ne soit pas négative
+		intensity = max(intensity, 0.0);
 
-		// Calcul de la couleur d'atmosphère
-		vec3 atmosphere = vec3( 1.0, 1.0, 1.0 ) * pow( intensity, 3.0 );
+		// Crée un halo rouge sur le bord
+		float threshold = 0.4;
+		float edge = smoothstep(threshold, threshold + 0.05, intensity);
 
-		// Fusion de la couleur diffuse et de l'atmosphère
-		gl_FragColor = vec4( diffuse + atmosphere, 1.0 );
+		// Couleur rouge pour le halo avec transparence
+		vec3 haloColor = vec3(1.0, 0.0, 0.0);
+
+		// La couleur finale mélange la couleur rouge avec une transparence complète ailleurs
+		gl_FragColor = vec4(haloColor * edge, edge);
 	}
 `
 

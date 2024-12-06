@@ -29,7 +29,8 @@ export const config = {
 		lines: true,
 		markers: true,
 		markerLabel: true,
-		markerPoint: true
+		markerPoint: true,
+		atmosphere: true
 	},
 	dots: {
 		total: 30

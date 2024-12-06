@@ -82,6 +82,7 @@ const Index = () => {
             controllers.push(displayFolder.add(config.display, 'markers'));
             controllers.push(displayFolder.add(config.display, 'markerLabel'));
             controllers.push(displayFolder.add(config.display, 'markerPoint'));
+            controllers.push(displayFolder.add(config.display, 'atmosphere'));
 
             const animationsFolder = gui.addFolder('Animations');
             controllers.push(animationsFolder.add(animations, 'rotateGlobe'));
@@ -136,6 +137,12 @@ const Index = () => {
             console.error("lines are not initialized");
         }
 
+        if (elements.atmosphere) {
+            groups.globe.add(elements.atmosphere);
+        } else {
+            console.error("Atmosphere is not initialized.");
+        }
+
         app.scene.add(groups.globe);
 
         //console.log("Globe group:", groups.globe);
@@ -158,6 +165,10 @@ const Index = () => {
                 });
             };
 
+            if (elements.atmosphere) {
+                elements.atmosphere.visible = config.display.atmosphere;
+            }
+
             if (elements.globePoints) {
                 updateMaterial(elements.globePoints, 'size', config.sizes.globeDotSize);
                 elements.globePoints.material.color.set(config.colors.globeDotColor);
@@ -176,8 +187,8 @@ const Index = () => {
                 //console.log("Elements lines:", elements.lines);
             }
 
-            [groups.markers, groups.points].forEach((group, index) => {
-                const configKeys = ['markers', 'points'];
+            [groups.map, groups.markers, groups.points].forEach((group, index) => {
+                const configKeys = ['map', 'markers', 'points'];
                 if (group) group.visible = config.display[configKeys[index]];
             });
 
@@ -222,6 +233,7 @@ const Index = () => {
             groups.globe.add(groups.lines || new THREE.Group());
             groups.globe.add(groups.markers || new THREE.Group());
             groups.globe.add(groups.points || new THREE.Group());
+            groups.globe.add(groups.map || new THREE.Group());
 
             // Vérifie l'initialisation de renderer et globe avant de continuer
             if (!app.renderer) {

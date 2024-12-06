@@ -108,14 +108,13 @@ class Globe extends Component {
             }
         );
 
-        //console.log('Texture chargée', config.urls.globeTexture);
-
-        const material = new THREE.MeshStandardMaterial({
-            map: texture,
-            //transparent: false,
+        return new THREE.ShaderMaterial({
+            uniforms: { texture: { value: texture } },
+            vertexShader: shaders.globe.vertexShader,
+            fragmentShader: shaders.globe.fragmentShader,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
         });
-
-        return material;
     }
 
     createGlobeAtmosphere() {
