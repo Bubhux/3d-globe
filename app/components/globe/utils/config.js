@@ -6,7 +6,7 @@ export const config = {
 	},
 	sizes: {
 		globe: 200,
-		globeDotSize: 2
+		globeDotSize: 3
 	},
 	scale: {
 		points: 0.025,
@@ -17,11 +17,11 @@ export const config = {
 		globe: 0.001
 	},
 	colors: {
-		globeDotColor: 'rgb(203, 168, 0)',
+		globeDotColor: 'rgb(149,81,9)',
 		globeMarkerColor: 'rgb(143, 216, 216)',
 		globeMarkerGlow: 'rgb(255, 255, 255)',
-		globeLines: 'rgb(255, 255, 255)',
-		globeLinesDots: 'rgb(255, 255, 255)'
+		globeLines: 'rgb(182,182,182)',
+		globeLinesDots: 'rgb(148, 148, 233)'
 	},
 	display: {
 		points: true,

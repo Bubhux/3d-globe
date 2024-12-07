@@ -19,7 +19,6 @@ import "./main.module.css"
 
 
 const Index = () => {
-    //console.log("Main component loaded");
     const [controls, setControls] = useState({ changed: true });
     const [data, setData] = useState({ grid: [], countries: [], connections: [] });
     const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +27,6 @@ const Index = () => {
     useEffect(() => {
         if (!appRef.current) {
             appRef.current = new App({ setup, animate, preload });
-            //console.log("App instance created:", app);
             window.onresize = appRef.current.handleResize;
         }
 
@@ -43,7 +41,6 @@ const Index = () => {
 
     const preload = async () => {
         try {
-            //console.log("Preloading data...");
             const loadedData = {
                 grid: gridData.grid,
                 countries: countriesData.countries,
@@ -51,17 +48,14 @@ const Index = () => {
             };
 
             setData(loadedData);
-            //console.log("Preloading completed successfully", loadedData);
             return true;
         } catch (error) {
-            //console.error("Error during preloading:", error);
             setData({ error });
             return false;
         }//
     };
 
     const setup = (app) => {
-        //console.log("Setting up app...");
         const controllers = [];
 
         app.addControlGui(gui => {
@@ -96,8 +90,6 @@ const Index = () => {
 
             });
         });
-
-        //console.log("Controllers initialized", controllers);
 
         app.camera.position.z = config.sizes.globe * 2.85;
         app.camera.position.y = config.sizes.globe * 0;
@@ -144,14 +136,9 @@ const Index = () => {
         }
 
         app.scene.add(groups.globe);
-
-        //console.log("Globe group:", groups.globe);
-        //console.log("Groups:", groups);
-        //console.log("Scene setup completed");
     };
 
     const animate = (app) => {
-        //console.log("Animating app...");
         if (controls.changed) {
             const updateMaterial = (element, property, value) => {
                 if (element) {
@@ -184,7 +171,6 @@ const Index = () => {
                 elements.lines.forEach(line => {
                     line.material.color.set(config.colors.globeLines);
                 });
-                //console.log("Elements lines:", elements.lines);
             }
 
             [groups.map, groups.markers, groups.points].forEach((group, index) => {
@@ -224,18 +210,15 @@ const Index = () => {
             });
         }
 
-        // Vérifie si globe est initialisé et journalise une erreur si non
         if (!groups.globe) {
             //console.error("groups.globe is not initialized.");
         } else {
-            // Ajoute atmosphere et lines à globe si elles sont initialisées
             groups.globe.add(groups.atmosphere || new THREE.Group());
             groups.globe.add(groups.lines || new THREE.Group());
             groups.globe.add(groups.markers || new THREE.Group());
             groups.globe.add(groups.points || new THREE.Group());
             groups.globe.add(groups.map || new THREE.Group());
 
-            // Vérifie l'initialisation de renderer et globe avant de continuer
             if (!app.renderer) {
                 //console.error("Renderer is not initialized.");
             }

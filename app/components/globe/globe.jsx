@@ -82,7 +82,9 @@ class Globe extends Component {
     initAtmosphere() {
         const atmosphereMaterial = this.createGlobeAtmosphere();
         const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(this.radius, 64, 64), atmosphereMaterial);
-        atmosphere.scale.set(1.2, 1.2, 1.2);
+        atmosphereMaterial.depthTest = false;
+
+        atmosphere.scale.set(1.4, 1.4, 1.4);
         elements.atmosphere = atmosphere;
 
         groups.atmosphere = new THREE.Group();

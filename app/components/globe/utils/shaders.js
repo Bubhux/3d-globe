@@ -26,8 +26,9 @@ shaders.globe.vertexShader = `
 
 // Shader de fragment pour le globe
 shaders.globe.fragmentShader = `
-	// Uniforme pour la texture du globe
+	// Uniformes pour la texture du globe et le temps
 	uniform sampler2D texture;
+	uniform float time;
 
 	// Variables interpolées depuis le shader de sommet
 	varying vec3 vNormal;
@@ -35,20 +36,28 @@ shaders.globe.fragmentShader = `
 
 	void main() {
 		// Calcul de l'intensité pour l'effet de bord basé sur la normale
-		float intensity = 1.05 - dot(normalize(vNormal), vec3(0.0, 0.0, 1.0));
+		float intensity = 1.2 - dot(normalize(vNormal), vec3(0.0, 0.0, 1.0));
 
-		// S'assurer que l'intensité ne soit pas négative
+		// S'assure que l'intensité ne soit pas négative
 		intensity = max(intensity, 0.0);
 
-		// Crée un halo rouge sur le bord
-		float threshold = 0.4;
+		// Ajuste le seuil pour placer l'effet à l'extérieur
+		float threshold = 0.8;
 		float edge = smoothstep(threshold, threshold + 0.05, intensity);
 
-		// Couleur rouge pour le halo avec transparence
-		vec3 haloColor = vec3(1.0, 0.0, 0.0);
+		// Dégradé de couleur pour le halo (gris-blanc transparent)
+		vec3 haloColor = mix(vec3(0.5), vec3(1.0), edge);
+		float alpha = smoothstep(1.0, 0.1, edge) * (1.0 - edge); // Effet de fondu
 
-		// La couleur finale mélange la couleur rouge avec une transparence complète ailleurs
-		gl_FragColor = vec4(haloColor * edge, edge);
+		// Calcul du mouvement sur la surface
+		float waveMovement = sin(vUv.y * 10.0 + time) * 0.05; // Mouvement de vague
+		float gasMovement = (sin(time * 2.0 + vUv.x * 5.0) + 1.0) * 0.5; // Mouvement de gaz
+
+		// Ajouter une pulsation
+		float pulse = 0.1 * sin(time * 3.0) + 0.1; // Pulsation légère
+
+		// Appliquer le mouvement au halo
+		gl_FragColor = vec4(haloColor * alpha * gasMovement * pulse, alpha);
 	}
 `
 
