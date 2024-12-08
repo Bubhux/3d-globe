@@ -1,6 +1,5 @@
 // app/components/globe/points.jsx
 import * as THREE from 'three';
-import React, { Component } from 'react';
 import { fabric } from 'fabric';
 
 import { toSphereCoordinates } from '~/components/globe/utils/utils';

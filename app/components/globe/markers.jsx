@@ -1,6 +1,6 @@
 // app/components/globe/markers.jsx
 import * as THREE from 'three';
-import React, { Component } from 'react';
+
 import { toSphereCoordinates } from './utils/utils';
 import { config, groups, elements } from '~/components/globe/utils/config';
 
@@ -60,8 +60,6 @@ class Markers extends THREE.Group {
         }
 
         groups.globe.add(this.markers);
-        //console.log("Markers added to globe:", this.markers);
-        //console.log("All marker coordinates in create:", allCoords);
     }
 
     render() {

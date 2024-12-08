@@ -1,5 +1,6 @@
 // app/components/globe/dots.jsx
 import * as THREE from 'three';
+
 import { config, groups, countries, elements } from '~/components/globe/utils/config';
 
 
