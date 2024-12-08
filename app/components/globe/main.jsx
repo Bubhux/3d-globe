@@ -1,4 +1,5 @@
 // app/components/globe/main.jsx
+import * as THREE from 'three';
 import React, { useEffect, useRef, useState } from 'react';
 
 import App from './app';
@@ -8,11 +9,10 @@ import Marker from './marker';
 import Markers from './markers';
 import Points from './points';
 
-import gridData from '~/components/globe/data/grid.js';
-import countriesData from '~/components/globe/data/countries.js';
-import connectionsData from '~/components/globe/data/connections.js';
+import gridData from '~/components/globe/data/grid';
+import countriesData from '~/components/globe/data/countries';
+import connectionsData from '~/components/globe/data/connections';
 
-import * as THREE from 'three';
 import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
 import "./main.module.css"
@@ -57,8 +57,8 @@ const Index = () => {
 
     const setup = (app) => {
         const controllers = [];
-
-        app.addControlGui(gui => {
+        // Panneau de configuration décommenter pour pourvoir l'afficher.
+        {/* app.addControlGui(gui => {
             const colorFolder = gui.addFolder('Colors');
             controllers.push(colorFolder.addColor(config.colors, 'globeDotColor'));
             controllers.push(colorFolder.addColor(config.colors, 'globeMarkerColor'));
@@ -89,19 +89,17 @@ const Index = () => {
                 setControls(prevControls => ({ ...prevControls, changed: true }));
 
             });
-        });
+        }); */}
 
         app.camera.position.z = config.sizes.globe * 2.85;
         app.camera.position.y = config.sizes.globe * 0;
-        app.controls.enableDamping = true;
-        app.controls.dampingFactor = 0.05;
-        app.controls.rotateSpeed = 0.07;
 
         groups.globe = new THREE.Group();
         groups.globe.name = 'Globe';
 
         const globeInstance = new Globe();
         const globeObject = globeInstance.getObject3D();
+
         if (globeObject) {
             groups.globe.add(globeObject);
         } else {
@@ -211,7 +209,7 @@ const Index = () => {
         }
 
         if (!groups.globe) {
-            //console.error("groups.globe is not initialized.");
+            console.error("groups.globe is not initialized.");
         } else {
             groups.globe.add(groups.atmosphere || new THREE.Group());
             groups.globe.add(groups.lines || new THREE.Group());
@@ -220,7 +218,7 @@ const Index = () => {
             groups.globe.add(groups.map || new THREE.Group());
 
             if (!app.renderer) {
-                //console.error("Renderer is not initialized.");
+                console.error("Renderer is not initialized.");
             }
         }
 
@@ -236,13 +234,13 @@ const Index = () => {
             if (appRef.current) {
                 animate(appRef.current);
             }
-            requestAnimationFrame(animateLoop);
+            animationId = requestAnimationFrame(animateLoop);
         };
 
-        animateLoop();
+        let animationId = requestAnimationFrame(animateLoop);
 
         return () => {
-            // Cleanup si nécessaire
+            cancelAnimationFrame(animationId);
         };
     }, []);
 
@@ -252,7 +250,8 @@ const Index = () => {
 
     return (
         <div className="app-wrapper">
-            {isLoading && <div>Loading main.jsx...</div>}
+            {/* {isLoading && <div>Loading main.jsx...</div>} */}
+            {isLoading}
             <Globe
                 scene={appRef.current?.scene}
                 setIsLoading={setIsLoading}

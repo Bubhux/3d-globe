@@ -1,8 +1,9 @@
 // app/components/globe/globe.jsx
+import * as THREE from 'three';
 import React, { Component } from 'react';
+
 import { shaders } from '~/components/globe/utils/shaders';
 import { config, elements, groups } from '~/components/globe/utils/config';
-import * as THREE from 'three';
 import { NoiseGenerator } from '~/components/globe/libs/perlin-noise.js';
 
 
@@ -29,7 +30,6 @@ class Globe extends Component {
             this.props.scene.add(groups.globe);
         }
 
-        // Lance l'animation
         this.animate();
     }
 
@@ -92,7 +92,6 @@ class Globe extends Component {
 
         groups.atmosphere.add(atmosphere);
         groups.globe.add(groups.atmosphere);
-        //console.log("Function initAtmosphere:", groups.globe);
     }
 
     createGlobeMaterial() {
@@ -120,7 +119,6 @@ class Globe extends Component {
     }
 
     createGlobeAtmosphere() {
-        //console.log('Class Globe function createGlobeAtmosphere called');
 
         this.noiseTexture = this.generateNoiseTexture(performance.now() * 0.001);
 

@@ -12,7 +12,7 @@ const DEGREE_TO_RADIAN = Math.PI / 180; // Conversion de degrés en radians
 // Convertir des degrés en radians
 const toRadians = (degrees) => degrees * DEGREE_TO_RADIAN;
 
-// Convertir la latitude et la longitude en coordonnées 3D sur une sphère
+// Convertis la latitude et la longitude en coordonnées 3D sur une sphère
 function toSphereCoordinates(lat, lng, scale) {
     const phi = toRadians(90 - lat);
     const theta = toRadians(180 - lng);
@@ -23,7 +23,7 @@ function toSphereCoordinates(lat, lng, scale) {
     };
 }
 
-// Calculer les coordonnées de la courbe entre deux points
+// Calcul les coordonnées de la courbe entre deux points
 function returnCurveCoordinates(latitudeA, longitudeA, latitudeB, longitudeB, size) {
     const start = toSphereCoordinates(latitudeA, longitudeA, size);
     const end = toSphereCoordinates(latitudeB, longitudeB, size);
@@ -58,7 +58,7 @@ function clamp(num, min, max) {
     return Math.max(min, Math.min(num, max));
 }
 
-// Convertir la latitude et la longitude en position de type THREE.js Vector3
+// Convertis la latitude et la longitude en position de type THREE.js Vector3
 function coordinateToPosition(lat, lng, radius) {
     const phi = toRadians(90 - lat);
     const theta = toRadians(180 - lng);
@@ -70,12 +70,12 @@ function coordinateToPosition(lat, lng, radius) {
     );
 }
 
-// Obtenir les coordonnées de la courbe à partir de deux coordonnées géographiques
+// Obtiens les coordonnées de la courbe à partir de deux coordonnées géographiques
 function getSplineFromCoords(latitudeA, longitudeA, latitudeB, longitudeB, size) {
     const start = coordinateToPosition(latitudeA, longitudeA, size);
     const end = coordinateToPosition(latitudeB, longitudeB, size);
 
-    // Calculer l'altitude
+    // Calcul l'altitude
     const altitude = clamp(start.distanceTo(end) * 0.45, CURVE_MIN_ALTITUDE, CURVE_MAX_ALTITUDE);
 
     // Interpolation pour trouver les points de contrôle de la courbe
@@ -88,6 +88,6 @@ function getSplineFromCoords(latitudeA, longitudeA, latitudeB, longitudeB, size)
     return { start, end, mid1, mid2 };
 }
 
-// Exporter les fonctions pour une utilisation externe
+// Exporte les fonctions pour une utilisation externe
 export { toSphereCoordinates, returnCurveCoordinates, clamp, coordinateToPosition, getSplineFromCoords };
 

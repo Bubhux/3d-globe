@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import React, { Component } from 'react';
 import { fabric } from 'fabric';
+
 import { config, elements, groups, textures } from '~/components/globe/utils/config';
 
 
@@ -132,7 +133,7 @@ class Marker extends Component {
     }
 
     render() {
-        return null; // No visual output from this component
+        return null;
     }
 }
 
