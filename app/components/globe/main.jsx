@@ -18,7 +18,7 @@ import { config, elements, groups, animations } from '~/components/globe/utils/c
 import "./main.module.css"
 
 
-const Index = () => {
+const Main = () => {
     const [controls, setControls] = useState({ changed: true });
     const [data, setData] = useState({ grid: [], countries: [], connections: [] });
     const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +57,7 @@ const Index = () => {
 
     const setup = (app) => {
         const controllers = [];
-        // Panneau de configuration décommenter pour pourvoir l'afficher.
+        // Panneau de configuration décommenter pour activer le panneau de configuration.
         {/* app.addControlGui(gui => {
             const colorFolder = gui.addFolder('Colors');
             controllers.push(colorFolder.addColor(config.colors, 'globeDotColor'));
@@ -262,4 +262,4 @@ const Index = () => {
     );
 };
 
-export default Index;
+export default Main;
