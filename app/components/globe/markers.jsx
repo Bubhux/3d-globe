@@ -15,7 +15,7 @@ class Markers extends THREE.Group {
         this.countries = countries;
         this.radius = config.sizes.globe + config.sizes.globe * config.scale.markers;
 
-        this.markerGeometry = new THREE.SphereGeometry(markerRadius, 15, 15);
+        this.markerGeometry = new THREE.SphereGeometry(markerRadius, 8, 8);
         this.markerMaterial = new THREE.MeshBasicMaterial({
             transparent: true,
             opacity: 0.8,

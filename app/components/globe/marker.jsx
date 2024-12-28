@@ -49,9 +49,14 @@ class Marker extends Component {
         if (this.props.cords !== prevProps.cords) {
             this.setPosition();
         }
+
         if (this.props.geometry !== prevProps.geometry || this.props.material !== prevProps.material) {
-            this.createPoint();
-            this.createGlow();
+            if (!this.point) {
+                this.createPoint();
+            }
+            if (!this.glow) {
+                this.createGlow();
+            }
         }
     }
 
@@ -60,6 +65,8 @@ class Marker extends Component {
         const texture = new THREE.Texture(text);
         texture.minFilter = THREE.LinearFilter;
         textures.markerLabels.push(texture);
+
+        texture.needsUpdate = true;
 
         const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
         this.label = new THREE.Sprite(material);
@@ -72,7 +79,12 @@ class Marker extends Component {
     }
 
     createPoint() {
-        this.point = new THREE.Mesh(this.props.geometry, this.props.material);
+        this.point = new THREE.Mesh(this.props.geometry, new THREE.MeshBasicMaterial({
+            color: this.pointColor,
+            transparent: true,
+            opacity: 0.8,
+        }));
+
         this.point.material.color.set(this.pointColor);
         this.groupRef.add(this.point);
         elements.markerPoint.push(this.point);
