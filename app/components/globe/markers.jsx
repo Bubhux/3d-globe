@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { toSphereCoordinates } from './utils/utils';
 import { config, groups, elements } from '~/components/globe/utils/config';
 
-import Marker from './Marker';
+import Marker from './marker';
 
 
 class Markers extends THREE.Group {
