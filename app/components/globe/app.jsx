@@ -1,6 +1,6 @@
 // app/components/globe/app.jsx
 import * as THREE from 'three';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { OrbitControls } from 'three-stdlib';
 import dat from 'dat.gui';
 
