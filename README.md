@@ -119,8 +119,6 @@ $ npm run dev
 
 - L'application est exécutée dans une page web.   
 
-![interface application](/static/img/screen_globe.png)   
-
 <div style="display: flex; justify-content: flex-start; margin: 20px 0;">
     <div style="border: 1px solid #8d8d8d; border-radius: 5px; padding: 10px; padding-bottom: 2px; display: inline-block; margin-right: 10px; margin-left: 20px;">
         <img src="/static/img/screen_globe.png" alt="Screen globe" style="width: 1200px; height: auto;">
