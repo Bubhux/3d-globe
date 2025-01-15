@@ -58,7 +58,7 @@ const Main = () => {
     const setup = (app) => {
         const controllers = [];
         // Panneau de configuration décommenter pour activer le panneau de configuration.
-        {/* app.addControlGui(gui => {
+        {/*app.addControlGui(gui => {
             const colorFolder = gui.addFolder('Colors');
             controllers.push(colorFolder.addColor(config.colors, 'globeDotColor'));
             controllers.push(colorFolder.addColor(config.colors, 'globeMarkerColor'));
@@ -82,14 +82,14 @@ const Main = () => {
             controllers.push(animationsFolder.add(animations, 'rotateGlobe'));
 
             sizeFolder.open();
-        });
+        });*/}
 
         controllers.forEach(controller => {
             controller.onChange(() => {
                 setControls(prevControls => ({ ...prevControls, changed: true }));
 
             });
-        }); */}
+        });
 
         app.camera.position.z = config.sizes.globe * 2.85;
         app.camera.position.y = config.sizes.globe * 0;
