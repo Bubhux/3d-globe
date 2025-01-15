@@ -6,7 +6,7 @@ export const config = {
 	},
 	sizes: {
 		globe: 200,
-		globeDotSize: 3
+		globeDotSize: 1
 	},
 	scale: {
 		points: 0.025,
@@ -17,20 +17,22 @@ export const config = {
 		globe: 0.001
 	},
 	colors: {
-		globeDotColor: 'rgb(149,81,9)',
+		globeDotColor: 'rgb(129,129,129)',
 		globeMarkerColor: 'rgb(143, 216, 216)',
 		globeMarkerGlow: 'rgb(255, 255, 255)',
 		globeLines: 'rgb(182,182,182)',
 		globeLinesDots: 'rgb(148, 148, 233)'
 	},
 	display: {
-		points: true,
-		map: true,
+		points: false,
+		map: false,
 		lines: true,
 		markers: true,
 		markerLabel: true,
 		markerPoint: true,
-		atmosphere: true
+		atmosphere: true,
+		earthMap: true,
+		earthMapClouds: false
 	},
 	dots: {
 		total: 30
@@ -45,7 +47,9 @@ export const elements = {
 	markers: [],
 	markerLabel: [],
 	markerPoint: [],
-	lines: []
+	lines: [],
+	earthMap: null,
+	earthMapClouds: null
 };
 
 export const textures = {
@@ -61,6 +65,8 @@ export const groups = {
 	markers: null,
 	atmosphere: null,
 	lineDots: null,
+	earthMap: null,
+	earthMapClouds: null
 };
 
 export const countries = {

@@ -6,6 +6,9 @@ import { shaders } from '~/components/globe/utils/shaders';
 import { config, elements, groups } from '~/components/globe/utils/config';
 import { NoiseGenerator } from '~/components/globe/libs/perlin-noise.js';
 
+import mapTexture from '~/components/globe/textures/map_indexed.png';
+import mapTextureClouds from '~/components/globe/textures/clouds.jpg';
+
 
 class Globe extends Component {
     constructor(props) {
@@ -16,6 +19,8 @@ class Globe extends Component {
         this.noiseGenerator = new NoiseGenerator();
         this.noiseTexture = null;
         this.globeMaterial = null;
+        this.earthTexture = null;
+        this.earthTextureClouds = null;
     }
 
     componentDidMount() {
@@ -25,6 +30,8 @@ class Globe extends Component {
 
         this.initGlobe(geometry);
         this.initAtmosphere();
+        this.initEarthTexture()
+        this.initEarthTextureClouds()
 
         if (this.props.scene) {
             this.props.scene.add(groups.globe);
@@ -94,23 +101,94 @@ class Globe extends Component {
         groups.globe.add(groups.atmosphere);
     }
 
-    createGlobeMaterial() {
+    initEarthTexture() {
         const textureLoader = new THREE.TextureLoader();
-        const texture = textureLoader.load(
-            config.urls.globeTexture,
-            () => {
-                this.props.setIsLoading(false);
-                this.animate();
+
+        textureLoader.load(
+            mapTexture,
+            (texture) => {
+                // Charge la texture et l'associe à l'instance
+                this.earthTexture = texture;
+                console.log('Texture Earth chargée');
+
+                // Crée la géométrie et le matériau
+                const earthMapGeometry = new THREE.SphereGeometry(this.radius + 0.1, 64, 64); // Sphère légèrement plus grande
+                const earthMapMaterial = new THREE.MeshBasicMaterial({
+                    map: this.earthTexture,
+                    side: THREE.DoubleSide,
+                    transparent: true, // Permet la transparence
+                    opacity: 0.2, // Utilise la valeur d'opacité du config.js
+                });
+
+                // Déplacement de la texture sur les axes X et Y
+                // Déplace la texture légèrement à gauche sur l'axe X et vers le haut sur l'axe Y.
+                // La première valeur (-0.029) déplace la texture sur l'axe horizontal (X).
+                // La deuxième valeur (0.002) déplace la texture légèrement vers le haut sur l'axe vertical (Y).
+                this.earthTexture.offset.set(-0.029, 0.002);
+
+                // Crée la sphère avec la texture
+                const earthMap = new THREE.Mesh(earthMapGeometry, earthMapMaterial);
+
+                // Ajoute la sphère au groupe
+                groups.earthMapGeometry = new THREE.Group();
+                groups.earthMapGeometry.name = 'Earth map';
+
+                elements.earthMap = earthMap;
+                groups.earthMapGeometry.add(earthMap);
+                groups.globe.add(groups.earthMapGeometry);
+
+                elements.earthMap.visible = config.display.earthMap;
             },
             undefined,
             (error) => {
-                console.error('Erreur de chargement de la texture', error);
-                this.props.setIsLoading(false);
+                console.error('Erreur de chargement de la texture Earth', error);
             }
         );
+    }
+
+    initEarthTextureClouds() {
+        const textureLoader = new THREE.TextureLoader();
+
+        textureLoader.load(
+            mapTextureClouds,
+            (texture) => {
+                // Charge la texture et l'associe à l'instance
+                this.earthTextureClouds = texture;
+                console.log('Texture Earth clouds chargée');
+
+                // Crée la géométrie et le matériau
+                const earthMapCloudsGeometry = new THREE.SphereGeometry(this.radius + 0.1, 64, 64); // Sphère légèrement plus grande
+                const earthMapCloudsMaterial = new THREE.MeshBasicMaterial({
+                    map: this.earthTextureClouds,
+                    side: THREE.DoubleSide,
+                    transparent: true, // Permet la transparence
+                    opacity: 0.1, // Définit l'opacité
+                });
+
+                // Crée la sphère avec la texture
+                const earthMapClouds = new THREE.Mesh(earthMapCloudsGeometry, earthMapCloudsMaterial);
+
+                // Ajoute la sphère au groupe
+                groups.earthMapCloudsGeometry = new THREE.Group();
+                groups.earthMapCloudsGeometry.name = 'Earth map clouds';
+
+                elements.earthMapClouds = earthMapClouds;
+                groups.earthMapCloudsGeometry.add(earthMapClouds);
+                groups.globe.add(groups.earthMapCloudsGeometry);
+
+                elements.earthMapClouds.visible = config.display.earthMapClouds;
+            },
+            undefined,
+            (error) => {
+                console.error('Erreur de chargement de la texture Earth clouds', error);
+            }
+        );
+    }
+
+    createGlobeMaterial() {
 
         return new THREE.ShaderMaterial({
-            uniforms: { texture: { value: texture } },
+            uniforms: { texture: { value: this.earthTexture } },
             vertexShader: shaders.globe.vertexShader,
             fragmentShader: shaders.globe.fragmentShader,
             blending: THREE.AdditiveBlending,

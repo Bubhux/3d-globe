@@ -14,7 +14,7 @@ shaders.globe.vertexShader = `
 
 	void main() {
 		// Calcul de la position du vertex dans l'espace de projection
-		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.01 );
 
 		// Normalisation et transmission de la normale du vertex
 		vNormal = normalize( normalMatrix * normal );

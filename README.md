@@ -16,10 +16,10 @@
 ## Menu   
 
 1. **[Informations générales](#informations-générales)**   
-2. **[Liste pré-requis](#liste-pre-requis)**   
-3. **[Lancement de l'application](#lancement-application)**   
-4. **[Interface de l'application](#interface-application)**   
-5. **[Accès à la démonstration en ligne](#lien-application)**   
+2. **[Interface de l'application](#interface-application)**   
+3. **[Accès à la démonstration en ligne](#lien-application)**   
+4. **[Liste pré-requis](#liste-pre-requis)**   
+5. **[Lancement de l'application](#lancement-application)**   
 6. **[Informations importantes sur les différents fichiers et dossiers](#informations-importantes)**   
 7. **[Auteur et contact](#auteur-contact)**   
 
@@ -33,6 +33,7 @@
 
 - Le panneau de configuration **app.addControlGui** (si il est décommenté dans le fichier ``main.jsx`` ➔ ([main.jsx](app/components/globe)))   
   permet de modifier les paramètres suivants.   
+  &nbsp;
 
     - ``globeDotColor`` : Permet de changer la couleurs des **Dots**   
     - ``globeMarkerColor`` : Permet de changer la couleurs des **Marker**   
@@ -51,6 +52,69 @@
     - ``markerLabel`` : Permet de désactiver les **markerLabel**   
     - ``markerPoint`` : Permet de désactiver les **markerPoint**   
     - ``atmosphere`` : Permet de désactiver **l'atmosphere**   
+      &nbsp;
+  
+- Vous pouvez modifier les différentes textures pour le globe disponible dans le dossier ``textures``.   
+  &nbsp;
+
+  - ``earth_dark.jpg`` ➔ ([Fichier earth_dark.jpg](/app/components/globe/textures/earth_dark.jpg))   
+  - ``earth_day.jpg`` ➔ ([Fichier earth_day.jpg](/app/components/globe/textures/earth_day.jpg))   
+  - ``earth_night.jpg`` ➔ ([Fichier earth_night.jpg](/app/components/globe/textures/earth_night.jpg))   
+  - ``map_indexed.png`` ➔ ([Fichier map_indexed.png](/app/components/globe/textures/map_indexed.png))   
+  - ``map_outline.png`` ➔ ([Fichier map_outline.png](/app/components/globe/textures/map_outline.png))   
+    &nbsp;
+
+- Une texture pour les nuages est disponible dans le dossier ``textures``.   
+  &nbsp;
+
+  - ``clouds.jpg`` ➔ ([Fichier clouds.jpg](/app/components/globe/textures/clouds.jpg)) 
+    &nbsp;
+
+- Ensuite il faudra modifier le fichier ``globe.jsx`` ➔ ([Fichier globe.jsx](/app/components/globe/globe.jsx))   
+
+```jsx
+// app/components/globe/globe.jsx
+import * as THREE from 'three';
+import { Component } from 'react';
+
+import { shaders } from '~/components/globe/utils/shaders';
+import { config, elements, groups } from '~/components/globe/utils/config';
+import { NoiseGenerator } from '~/components/globe/libs/perlin-noise.js';
+
+import mapTexture from '~/components/globe/textures/map_indexed.png'; // Modifier ici le choix de la texture
+import mapTextureClouds from '~/components/globe/textures/clouds.jpg';
+```   
+&nbsp;
+
+- Vous pouvez paramétrer les diverses options du globe dans le fichier ``config.js``.
+  &nbsp;
+
+  - ``config.js`` ➔ ([config.js](/app/components/globe/utils/config.js))   
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<div id="interface-application"></div>
+<a href="#top" style="float: right;">Retour en haut 🡅</a>
+
+### Interface de l'application   
+
+- L'application est exécutée dans une page web.   
+
+<div style="display: flex; justify-content: flex-start; margin: 20px 0;">
+    <div style="border: 1px solid #8d8d8d; border-radius: 5px; padding: 10px; padding-bottom: 2px; display: inline-block; margin-right: 10px; margin-left: 20px;">
+        <img src="/static/img/screen_globe.png" alt="Screen globe" style="width: 1200px; height: auto;">
+    </div>
+</div>
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<div id="lien-application"></div>
+<a href="#top" style="float: right;">Retour en haut 🡅</a>
+
+### Accès à la démonstration en ligne   
+
+- Vous pouvez accéder à une démonstration de l'application via **Cloudflare**.   
+- En utilisant le lien suivant ➔ [Lien de l'application en ligne](https://globe-7xi.pages.dev/)   
 
 --------------------------------------------------------------------------------------------------------------------------------
 
@@ -112,31 +176,6 @@ $ npm run dev
 
 --------------------------------------------------------------------------------------------------------------------------------
 
-<div id="interface-application"></div>
-<a href="#top" style="float: right;">Retour en haut 🡅</a>
-
-### Interface de l'application   
-
-- L'application est exécutée dans une page web.   
-
-<div style="display: flex; justify-content: flex-start; margin: 20px 0;">
-    <div style="border: 1px solid #8d8d8d; border-radius: 5px; padding: 10px; padding-bottom: 2px; display: inline-block; margin-right: 10px; margin-left: 20px;">
-        <img src="/static/img/screen_globe.png" alt="Screen globe" style="width: 1200px; height: auto;">
-    </div>
-</div>
-
---------------------------------------------------------------------------------------------------------------------------------
-
-<div id="lien-application"></div>
-<a href="#top" style="float: right;">Retour en haut 🡅</a>
-
-### Accès à la démonstration en ligne   
-
-- Vous pouvez accéder à une démonstration de l'application via **Cloudflare**.   
-- En utilisant le lien suivant ➔ [Lien de l'application en ligne](https://bubhux.github.io/App-TodoListCalendar/)   
-
---------------------------------------------------------------------------------------------------------------------------------
-
 <div id="informations-importantes"></div>
 <a href="#top" style="float: right;">Retour en haut 🡅</a>
 
@@ -194,7 +233,6 @@ $ npm run dev
 
       - ``static`` ➔ ([badges](/static/badges))   
       - ``static`` ➔ ([img](/static/img))   
-      - ``static`` ➔ ([video](/static/video)) 
 
 --------------------------------------------------------------------------------------------------------------------------------
 
