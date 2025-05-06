@@ -7,7 +7,7 @@ import { config, elements, groups } from '~/components/globe/utils/config';
 import { NoiseGenerator } from '~/components/globe/libs/perlin-noise.js';
 
 import mapTexture from '~/components/globe/textures/map_indexed.png';
-import mapTextureClouds from '~/components/globe/textures/clouds.jpg';
+import mapTextureClouds from '~/components/globe/textures/earth_clouds.png';
 
 
 class Globe extends Component {

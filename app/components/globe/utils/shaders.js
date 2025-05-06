@@ -3,7 +3,8 @@
 export const shaders = {
 	atmosphere: {},
 	globe: {},
-	dot: {}
+	dot: {},
+	clouds: {}
 }
 
 // Shader de sommet pour le globe
@@ -57,7 +58,7 @@ shaders.globe.fragmentShader = `
 		float pulse = 0.1 * sin(time * 3.0) + 0.1; // Pulsation légère
 
 		// Appliquer le mouvement au halo
-		gl_FragColor = vec4(haloColor * alpha * gasMovement * pulse, alpha);
+		gl_FragColor = vec4(haloColor * alpha * pulse, alpha);
 	}
 `
 
@@ -150,5 +151,57 @@ shaders.dot.fragmentShader = `
 
 		// Test alpha pour éliminer les fragments transparents indésirables
 		if ( gl_FragColor.a < ALPHATEST ) discard;
+	}
+`
+
+// Shader de sommet pour les nuages (clouds) sur le globe
+shaders.clouds.vertexShader = `
+	varying vec2 vUv;
+	uniform float time;
+
+	void main() {
+		// Récupérer la position du vertex dans l'espace du modèle
+		vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+		// Animation des nuages : Appliquer un mouvement de rotation autour du globe
+		float angle = time * 0.02; // Vitesse de rotation
+		mat4 rotationMatrix = mat4(
+			vec4(cos(angle), 0.0, sin(angle), 0.0),
+			vec4(0.0, 1.0, 0.0, 0.0),
+			vec4(-sin(angle), 0.0, cos(angle), 0.0),
+			vec4(0.0, 0.0, 0.0, 1.0)
+		);
+
+		// Appliquer la rotation sur la position
+		modelPosition = rotationMatrix * modelPosition;
+
+		// Passer les coordonnées UV au fragment shader
+		vUv = uv;
+
+		// Calculer la position finale en espace du monde
+		vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+
+		// Calculer la position finale dans l'espace de la caméra
+		vec4 viewPosition = viewMatrix * worldPosition;
+
+		// Finalement, appliquer la projection pour obtenir les coordonnées écran
+		gl_Position = projectionMatrix * viewPosition;
+	}
+`
+
+// Shader de fragment pour les nuages (clouds) sur le globe
+shaders.clouds.fragmentShader = `
+	uniform sampler2D cloudTexture;
+	varying vec2 vUv;
+
+	void main() {
+		// Appliquer un mouvement aux nuages en décalant les coordonnées UV
+		vec2 uvOffset = vUv + vec2(0.1 * sin(vUv.y * 10.0), 0.1 * cos(vUv.x * 10.0)); // Mouvement sinusoïdal
+
+		// Appliquer la texture des nuages
+		vec4 cloudColor = texture2D(cloudTexture, uvOffset);
+
+		// Contrôler l'opacité des nuages
+		gl_FragColor = vec4(cloudColor.rgb, cloudColor.a * 0.1); // Faible opacité pour les nuages
 	}
 `
