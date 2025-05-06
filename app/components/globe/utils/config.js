@@ -11,7 +11,7 @@ export const config = {
 	scale: {
 		points: 0.025,
 		markers: 0.025,
-		globeScale: 1
+		globeScale: 0.1
 	},
 	rotation: {
 		globe: 0.001
@@ -24,15 +24,16 @@ export const config = {
 		globeLinesDots: 'rgb(148, 148, 233)'
 	},
 	display: {
-		points: false,
-		map: false,
+		points: true,
+		map: true,
 		lines: true,
+		lineDots: true,
 		markers: true,
 		markerLabel: true,
 		markerPoint: true,
 		atmosphere: true,
 		earthMap: true,
-		earthMapClouds: false
+		earthMapClouds: true
 	},
 	dots: {
 		total: 30

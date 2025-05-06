@@ -1,8 +1,7 @@
 // app/components/globe/marker.jsx
 import * as THREE from 'three';
-import { Component } from 'react';
-import { fabric } from 'fabric';
 
+import { Component } from 'react';
 import { config, elements, groups, textures } from '~/components/globe/utils/config';
 
 
@@ -60,22 +59,52 @@ class Marker extends Component {
         }
     }
 
-    createLabel() {
-        const text = this.createText();
-        const texture = new THREE.Texture(text);
-        texture.minFilter = THREE.LinearFilter;
-        textures.markerLabels.push(texture);
+    async createLabel() {
+        try {
+            // Crée un canvas pour générer une texture de texte
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
 
-        texture.needsUpdate = true;
+            // Définir la taille du canvas en fonction de la longueur du texte
+            const text = this.labelText;
+            const fontSize = 48; // Taille de la police
+            context.font = `${fontSize}px Open Sans`;
+            const textWidth = context.measureText(text).width;
+            canvas.width = textWidth;
+            canvas.height = fontSize;
 
-        const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
-        this.label = new THREE.Sprite(material);
-        this.label.scale.set(40, 20, 1);
-        this.label.center.x = 0.25;
-        this.label.translateY(2);
+            // Dessine le texte sur le canvas
+            context.font = `${fontSize}px Open Sans`;
+            context.fillStyle = this.textColor;
+            context.textBaseline = 'top';
+            context.fillText(text, 0, 0);
 
-        this.groupRef.add(this.label);
-        elements.markerLabel.push(this.label);
+            // Crée une texture à partir du canvas
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.minFilter = THREE.LinearFilter;
+            textures.needsUpdate = true;
+
+            // Crée un matériau Sprite pour afficher la texture
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+
+            // Ajuste l'échelle du sprite
+            const scale = 0.1; // Ajuste l'échelle selon vos besoins
+            sprite.scale.set(textWidth * scale, fontSize * scale, 1);
+
+            // Positionne le sprite
+            sprite.position.set(0, 9, 0); // Ajuste la position selon vos besoins
+
+            // Ajoute le sprite au groupe
+            this.groupRef.add(sprite);
+
+            // Ajoute le label à la liste des éléments
+            if (elements?.markerLabel) {
+                elements.markerLabel.push(sprite);
+            }
+        } catch (error) {
+            console.error("Error loading the font :", error);
+        }
     }
 
     createPoint() {
@@ -121,23 +150,13 @@ class Marker extends Component {
     }
 
     setPosition() {
+        console.log("Coordinates received :", this.props.cords);
+        if (!this.props.cords || typeof this.props.cords !== 'object') {
+            console.error("The coordinates are not valid :", this.props.cords);
+            return;
+        }
         const { x, y, z } = this.props.cords;
         this.groupRef.position.set(-x, y, -z);
-    }
-
-    createText() {
-        const element = document.createElement('canvas');
-        const canvas = new fabric.Canvas(element);
-
-        const text = new fabric.Text(this.labelText, {
-            left: 0,
-            top: 0,
-            fill: this.textColor,
-            fontFamily: 'Open Sans',
-        });
-
-        canvas.add(text);
-        return element;
     }
 
     getGroup() {
