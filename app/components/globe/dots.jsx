@@ -42,6 +42,9 @@ class Dot {
 
         this._path = null;
         this._pathIndex = 0;
+
+        this._speedFactor = 2;
+        this._frameCounter = 0;
     }
 
     assignToLine() {
@@ -58,15 +61,20 @@ class Dot {
             if (Math.random() > 0.99) {
                 this.assignToLine();
                 this._pathIndex = 0;
+                this._frameCounter = 0;
             }
         } else if (this._path && this._pathIndex < this._path.length - 1) {
             if (!this.mesh.visible) {
                 this.mesh.visible = true;
             }
 
-            const { x, y, z } = this._path[this._pathIndex];
-            this.mesh.position.set(x, y, z);
-            this._pathIndex++;
+            if (this._frameCounter % this._speedFactor === 0) {
+                const { x, y, z } = this._path[this._pathIndex];
+                this.mesh.position.set(x, y, z);
+                this._pathIndex++;
+            }
+
+            this._frameCounter++;
         } else {
             this.mesh.visible = false;
             this._path = null;

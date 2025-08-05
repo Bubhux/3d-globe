@@ -15,7 +15,8 @@ import connectionsData from '~/components/globe/data/connections';
 
 import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
-import "./main.module.css"
+
+import styles from './main.module.css';
 
 
 const Main = () => {
@@ -23,6 +24,8 @@ const Main = () => {
     const [data, setData] = useState({ grid: [], countries: [], connections: [] });
     const [isLoading, setIsLoading] = useState(true);
     const appRef = useRef();
+    const globeRef = useRef();
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
     useEffect(() => {
         if (!appRef.current) {
@@ -31,10 +34,9 @@ const Main = () => {
         }
 
         return () => {
-            if (appRef.current && appRef.current.guiRef) {
+            if (appRef.current?.guiRef) {
                 appRef.current.guiRef.destroy();
             }
-            window.onload = null;
             window.onresize = null;
         };
     }, []);
@@ -48,11 +50,21 @@ const Main = () => {
             };
 
             setData(loadedData);
+
+            // Charger toutes les textures du globe AVANT de faire le setup
+            globeRef.current = new Globe();
+            await globeRef.current.loadTextures();
+
+            //await new Promise(resolve => setTimeout(resolve, 3000));
+
+            setIsLoading(false);
             return true;
         } catch (error) {
+            console.error('Erreur de chargement', error);
             setData({ error });
+            setIsLoading(false);
             return false;
-        }//
+        }
     };
 
     const setup = (app) => {
@@ -99,40 +111,28 @@ const Main = () => {
         groups.globe = new THREE.Group();
         groups.globe.name = 'Globe';
 
-        const globeInstance = new Globe();
-        const globeObject = globeInstance.getObject3D();
-
-        if (globeObject) {
-            groups.globe.add(globeObject);
-        } else {
-            console.error("globeObject is not initialized");
+        // ⚠️ Injecter les objets 3D une fois les textures chargées
+        if (globeRef.current) {
+            globeRef.current.setup(app.scene);
         }
 
         const points = new Points(gridData);
         if (points) {
             groups.globe.add(points);
-        } else {
-            console.error("points are not initialized");
         }
 
         const markers = new Markers(countriesData);
         if (markers) {
             groups.globe.add(markers);
-        } else {
-            console.error("markers are not initialized");
         }
 
         const lines = new Lines({ connections: connectionsData.connections });
         if (lines) {
             groups.globe.add(lines);
-        } else {
-            console.error("lines are not initialized");
         }
 
         if (elements.atmosphere) {
             groups.globe.add(elements.atmosphere);
-        } else {
-            console.error("Atmosphere is not initialized.");
         }
 
         app.scene.add(groups.globe);
@@ -141,17 +141,15 @@ const Main = () => {
     const animate = (app) => {
         if (controls.changed) {
             const updateMaterial = (element, property, value) => {
-                if (element && element.material) {
+                if (element?.material) {
                     element.material[property] = value;
                 }
             };
 
-            const updateVisibility = (elements, visible) => {
-                if (elements) {
-                    elements.forEach(element => {
-                        if (element) element.visible = visible;
-                    });
-                }
+            const updateVisibility = (elementsList, visible) => {
+                elementsList?.forEach(element => {
+                    if (element) element.visible = visible;
+                });
             };
 
             if (groups.lines) {
@@ -172,57 +170,50 @@ const Main = () => {
             }
 
             if (elements.globe) {
-                elements.globe.scale.set(config.scale.globeScale, config.scale.globeScale, config.scale.globeScale);
-            } else {
-                console.error("Globe is not initialized.");
+                elements.globe.scale.set(
+                    config.scale.globeScale,
+                    config.scale.globeScale,
+                    config.scale.globeScale
+                );
             }
 
             if (elements.lines) {
                 elements.lines.forEach(line => {
-                    if (line && line.material) {
+                    if (line?.material) {
                         line.material.color.set(config.colors.globeLines);
                     }
                 });
             }
 
-            [groups.map, groups.markers, groups.points].forEach((group, index) => {
-                const configKeys = ['map', 'markers', 'points'];
-                if (group) group.visible = config.display[configKeys[index]];
+            ['map', 'markers', 'points'].forEach((key, index) => {
+                const group = [groups.map, groups.markers, groups.points][index];
+                if (group) group.visible = config.display[key];
             });
 
-            if (elements.markerLabel) {
-                updateVisibility(elements.markerLabel, config.display.markerLabel);
-            }
+            updateVisibility(elements.markerLabel, config.display.markerLabel);
+            updateVisibility(elements.markerPoint, config.display.markerPoint);
 
-            if (elements.markerPoint) {
-                updateVisibility(elements.markerPoint, config.display.markerPoint);
-            }
-
-            setControls(prevControls => ({ ...prevControls, changed: false }));
+            setControls(prev => ({ ...prev, changed: false }));
         }
 
         if (elements.lineDots) {
             elements.lineDots.forEach(dot => {
-                if (dot && dot.material) {
+                if (dot?.material) {
                     dot.material.color.set(config.colors.globeLinesDots);
-                    if (dot.animate) dot.animate();
+                    dot.animate();
                 }
             });
         }
 
-        if (elements.markers && elements.markers.length) {
+        if (elements.markers?.length) {
             elements.markers.forEach(marker => {
                 if (marker instanceof Marker) {
-                    if (marker.point && marker.point.material) {
-                        marker.point.material.color.set(config.colors.globeMarkerColor);
-                    }
-                    if (marker.glow && marker.glow.material) {
-                        marker.glow.material.color.set(config.colors.globeMarkerGlow);
-                    }
-                    if (marker.label && marker.label.material) {
+                    marker.point?.material?.color.set(config.colors.globeMarkerColor);
+                    marker.glow?.material?.color.set(config.colors.globeMarkerGlow);
+                    if (marker.label?.material?.map) {
                         marker.label.material.map.needsUpdate = true;
                     }
-                    if (marker.animateGlow) marker.animateGlow();
+                    marker.animateGlow?.();
                 }
             });
         }
@@ -241,8 +232,8 @@ const Main = () => {
             }
         }
 
-        if (animations.rotateGlobe) {
-            groups.globe.rotation.y -= 0.0025;
+        if (groups.globe && animations.rotateGlobe) {
+            groups.globe.rotation.y -= 0.0015;
         }
 
         if (app.renderer) {
@@ -251,18 +242,12 @@ const Main = () => {
     };
 
     useEffect(() => {
-        const animateLoop = () => {
-            if (appRef.current) {
-                animate(appRef.current);
-            }
+        let animationId = requestAnimationFrame(function animateLoop() {
+            if (appRef.current) animate(appRef.current);
             animationId = requestAnimationFrame(animateLoop);
-        };
+        });
 
-        let animationId = requestAnimationFrame(animateLoop);
-
-        return () => {
-            cancelAnimationFrame(animationId);
-        };
+        return () => cancelAnimationFrame(animationId);
     }, []);
 
     if (data.error) {
@@ -271,8 +256,12 @@ const Main = () => {
 
     return (
         <div className="app-wrapper">
-            {/* {isLoading && <div>Loading main.jsx...</div>} */}
-            {isLoading}
+            {isLoading && !hasLoadedOnce && (
+                <div className={`${styles.loaderWrapper} ${!isLoading ? styles.hidden : ''}`}>
+                    <div className={styles.loader}></div>
+                    <p className={styles.loaderMessage}>Loading ...</p>
+                </div>
+            )}
             <Globe
                 scene={appRef.current?.scene}
                 setIsLoading={setIsLoading}
