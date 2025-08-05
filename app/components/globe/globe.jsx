@@ -14,179 +14,176 @@ class Globe extends Component {
     constructor(props) {
         super(props);
         this.radius = config.sizes.globe;
-        this.mesh = null;
         this.group = new THREE.Group();
         this.noiseGenerator = new NoiseGenerator();
         this.noiseTexture = null;
         this.globeMaterial = null;
         this.earthTexture = null;
         this.earthTextureClouds = null;
+        this.animationId = null;
     }
 
-    componentDidMount() {
-        const geometry = new THREE.SphereGeometry(this.radius, 64, 64);
-        groups.globe = new THREE.Group();
-        groups.globe.name = 'Globe';
+    /** Méthode pour charger toutes les textures nécessaires */
+    loadTextures() {
+        const textureLoader = new THREE.TextureLoader();
 
-        this.initGlobe(geometry);
+        return Promise.all([
+            new Promise((resolve, reject) => {
+                textureLoader.load(
+                    mapTexture,
+                    (texture) => {
+                        this.earthTexture = texture;
+                        resolve();
+                    },
+                    undefined,
+                    reject
+                );
+            }),
+            new Promise((resolve, reject) => {
+                textureLoader.load(
+                    mapTextureClouds,
+                    (texture) => {
+                        this.earthTextureClouds = texture;
+                        resolve();
+                    },
+                    undefined,
+                    reject
+                );
+            }),
+        ]);
+    }
+
+    /** Prépare les éléments 3D après chargement des textures */
+    setup(scene) {
+        if (!this.earthTexture || !this.earthTextureClouds) {
+            console.warn("Textures non chargées !");
+            return;
+        }
+
+        this.initGlobe();
         this.initAtmosphere();
-        this.initEarthTexture()
-        this.initEarthTextureClouds()
+        this.initEarthTexture();
+        this.initEarthTextureClouds();
 
-        if (this.props.scene) {
-            this.props.scene.add(groups.globe);
+        if (scene) {
+            scene.add(groups.globe);
         }
 
         this.animate();
     }
 
+    /** Nettoyage à la destruction */
     componentWillUnmount() {
         if (this.props.scene) {
             this.props.scene.remove(groups.globe);
         }
-        cancelAnimationFrame(this.animationId); // Nettoie l'animation
+        cancelAnimationFrame(this.animationId);
     }
 
+    /** Boucle d’animation (atmosphère pulsante) */
     animate() {
-        const time = performance.now() * 0.001; // Temps en secondes
+        const time = performance.now() * 0.001;
 
-        if (this.noiseTexture) {
-            this.updateNoiseTexture(time);
-        }
+        if (this.noiseTexture) this.updateNoiseTexture(time);
 
-        if (this.globeMaterial && this.globeMaterial.uniforms && this.globeMaterial.uniforms.time) {
+        if (this.globeMaterial?.uniforms?.time) {
             this.globeMaterial.uniforms.time.value = time;
         }
 
         this.animationId = requestAnimationFrame(() => this.animate());
     }
 
-    init() {
-        const geometry = new THREE.SphereGeometry(this.radius, 64, 64);
-        const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.group.add(this.mesh);
-    }
-
+    /** Renvoie l’objet 3D du globe */
     getObject3D() {
         return this.group;
     }
 
-    initGlobe(geometry) {
+    /** Crée le globe principal avec shader */
+    initGlobe() {
+        const geometry = new THREE.SphereGeometry(this.radius, 64, 64);
         this.globeMaterial = this.createGlobeMaterial();
-        const scale = config.scale.globeScale;
+
         const globe = new THREE.Mesh(geometry, this.globeMaterial);
+        const scale = config.scale.globeScale;
         globe.scale.set(scale, scale, scale);
         elements.globe = globe;
 
         groups.map = new THREE.Group();
         groups.map.name = 'Map';
-
         groups.map.add(globe);
+
+        groups.globe = new THREE.Group();
+        groups.globe.name = 'Globe';
         groups.globe.add(groups.map);
     }
 
+    /** Ajoute la sphère atmosphérique */
     initAtmosphere() {
         const atmosphereMaterial = this.createGlobeAtmosphere();
-        const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(this.radius, 64, 64), atmosphereMaterial);
-        atmosphereMaterial.depthTest = false;
+        const atmosphere = new THREE.Mesh(
+            new THREE.SphereGeometry(this.radius, 64, 64),
+            atmosphereMaterial
+        );
 
         atmosphere.scale.set(1.4, 1.4, 1.4);
+        atmosphereMaterial.depthTest = false;
+
         elements.atmosphere = atmosphere;
 
         groups.atmosphere = new THREE.Group();
         groups.atmosphere.name = 'Atmosphere';
-
         groups.atmosphere.add(atmosphere);
+
         groups.globe.add(groups.atmosphere);
     }
 
+    /** Applique la texture de la Terre */
     initEarthTexture() {
-        const textureLoader = new THREE.TextureLoader();
+        const geometry = new THREE.SphereGeometry(this.radius + 0.1, 64, 64);
+        const material = new THREE.MeshBasicMaterial({
+            map: this.earthTexture,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.2,
+        });
 
-        textureLoader.load(
-            mapTexture,
-            (texture) => {
-                // Charge la texture et l'associe à l'instance
-                this.earthTexture = texture;
-                console.log('Texture Earth chargée');
+        this.earthTexture.offset.set(-0.029, 0.002);
+        const earthMap = new THREE.Mesh(geometry, material);
 
-                // Crée la géométrie et le matériau
-                const earthMapGeometry = new THREE.SphereGeometry(this.radius + 0.1, 64, 64); // Sphère légèrement plus grande
-                const earthMapMaterial = new THREE.MeshBasicMaterial({
-                    map: this.earthTexture,
-                    side: THREE.DoubleSide,
-                    transparent: true, // Permet la transparence
-                    opacity: 0.2, // Utilise la valeur d'opacité du config.js
-                });
+        groups.earthMapGeometry = new THREE.Group();
+        groups.earthMapGeometry.name = 'Earth map';
 
-                // Déplacement de la texture sur les axes X et Y
-                // Déplace la texture légèrement à gauche sur l'axe X et vers le haut sur l'axe Y.
-                // La première valeur (-0.029) déplace la texture sur l'axe horizontal (X).
-                // La deuxième valeur (0.002) déplace la texture légèrement vers le haut sur l'axe vertical (Y).
-                this.earthTexture.offset.set(-0.029, 0.002);
+        elements.earthMap = earthMap;
+        groups.earthMapGeometry.add(earthMap);
+        groups.globe.add(groups.earthMapGeometry);
 
-                // Crée la sphère avec la texture
-                const earthMap = new THREE.Mesh(earthMapGeometry, earthMapMaterial);
-
-                // Ajoute la sphère au groupe
-                groups.earthMapGeometry = new THREE.Group();
-                groups.earthMapGeometry.name = 'Earth map';
-
-                elements.earthMap = earthMap;
-                groups.earthMapGeometry.add(earthMap);
-                groups.globe.add(groups.earthMapGeometry);
-
-                elements.earthMap.visible = config.display.earthMap;
-            },
-            undefined,
-            (error) => {
-                console.error('Erreur de chargement de la texture Earth', error);
-            }
-        );
+        elements.earthMap.visible = config.display.earthMap;
     }
 
+    /** Applique la texture des nuages */
     initEarthTextureClouds() {
-        const textureLoader = new THREE.TextureLoader();
+        const geometry = new THREE.SphereGeometry(this.radius + 0.1, 64, 64);
+        const material = new THREE.MeshBasicMaterial({
+            map: this.earthTextureClouds,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.1,
+        });
 
-        textureLoader.load(
-            mapTextureClouds,
-            (texture) => {
-                // Charge la texture et l'associe à l'instance
-                this.earthTextureClouds = texture;
-                console.log('Texture Earth clouds chargée');
+        const earthClouds = new THREE.Mesh(geometry, material);
 
-                // Crée la géométrie et le matériau
-                const earthMapCloudsGeometry = new THREE.SphereGeometry(this.radius + 0.1, 64, 64); // Sphère légèrement plus grande
-                const earthMapCloudsMaterial = new THREE.MeshBasicMaterial({
-                    map: this.earthTextureClouds,
-                    side: THREE.DoubleSide,
-                    transparent: true, // Permet la transparence
-                    opacity: 0.1, // Définit l'opacité
-                });
+        groups.earthMapCloudsGeometry = new THREE.Group();
+        groups.earthMapCloudsGeometry.name = 'Earth map clouds';
 
-                // Crée la sphère avec la texture
-                const earthMapClouds = new THREE.Mesh(earthMapCloudsGeometry, earthMapCloudsMaterial);
+        elements.earthMapClouds = earthClouds;
+        groups.earthMapCloudsGeometry.add(earthClouds);
+        groups.globe.add(groups.earthMapCloudsGeometry);
 
-                // Ajoute la sphère au groupe
-                groups.earthMapCloudsGeometry = new THREE.Group();
-                groups.earthMapCloudsGeometry.name = 'Earth map clouds';
-
-                elements.earthMapClouds = earthMapClouds;
-                groups.earthMapCloudsGeometry.add(earthMapClouds);
-                groups.globe.add(groups.earthMapCloudsGeometry);
-
-                elements.earthMapClouds.visible = config.display.earthMapClouds;
-            },
-            undefined,
-            (error) => {
-                console.error('Erreur de chargement de la texture Earth clouds', error);
-            }
-        );
+        elements.earthMapClouds.visible = config.display.earthMapClouds;
     }
 
+    /** Shader pour la Terre */
     createGlobeMaterial() {
-
         return new THREE.ShaderMaterial({
             uniforms: { texture: { value: this.earthTexture } },
             vertexShader: shaders.globe.vertexShader,
@@ -196,15 +193,14 @@ class Globe extends Component {
         });
     }
 
+    /** Shader pour l’atmosphère */
     createGlobeAtmosphere() {
-
         this.noiseTexture = this.generateNoiseTexture(performance.now() * 0.001);
-
         return new THREE.ShaderMaterial({
             uniforms: {
                 noiseTexture: { value: this.noiseTexture },
-                opacity: { value: 0.9 }, // Augmente l'opacité pour le halo
-                time: { value: 0 }
+                opacity: { value: 0.9 },
+                time: { value: 0 },
             },
             vertexShader: shaders.atmosphere.vertexShader,
             fragmentShader: shaders.atmosphere.fragmentShader,
@@ -214,46 +210,45 @@ class Globe extends Component {
         });
     }
 
+    /** Texture bruitée pour l’atmosphère */
     generateNoiseTexture(time) {
         const size = 256;
         const data = new Uint8Array(size * size * 4);
-        const noiseScale = 0.01; // Réduit la fréquence du bruit pour un effet plus granuleux
+        const noiseScale = 0.01;
         const z = 0.5;
 
         const centerX = size / 2;
         const centerY = size / 2;
-        const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+        const maxDistance = Math.sqrt(centerX ** 2 + centerY ** 2);
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
                 const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
                 const normalizedDistance = distance / maxDistance;
-
-                // Effet de pulsation plus prononcé
-                const pulseEffect = 0.5 + 0.5 * Math.sin(time * 3 + normalizedDistance * 20); // Accélère l'effet de pulsation
+                const pulseEffect = 0.5 + 0.5 * Math.sin(time * 3 + normalizedDistance * 20);
 
                 const noiseValue = this.noiseGenerator.simplex3(x * noiseScale, y * noiseScale, z);
                 const value = (noiseValue + 1) * 0.5;
                 const colorValue = Math.floor(value * 255 * pulseEffect);
 
                 const index = (x + y * size) * 4;
-                data[index] = Math.min(colorValue * 1.0 + 100, 255);  // Accentue le rouge
-                data[index + 1] = Math.min(colorValue * 0.9 + 40, 255); // Accentue le vert
-                data[index + 2] = Math.min(colorValue * 1.2, 255); // Accentue le bleu
-                data[index + 3] = 255; // Opaque
+                data[index] = Math.min(colorValue * 1.0 + 100, 255);
+                data[index + 1] = Math.min(colorValue * 0.9 + 40, 255);
+                data[index + 2] = Math.min(colorValue * 1.2, 255);
+                data[index + 3] = 255;
             }
         }
 
         const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
         texture.needsUpdate = true;
-
         return texture;
     }
 
+    /** Mise à jour de la texture bruitée */
     updateNoiseTexture(time) {
         const size = 256;
         const data = new Uint8Array(size * size * 4);
-        const noiseScale = 0.1; // Assure que cela correspond à ce qui a été utilisé lors de la création
+        const noiseScale = 0.1;
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
@@ -261,19 +256,19 @@ class Globe extends Component {
                 const pulseEffect = 0.5 + 0.5 * Math.sin(time * 2 + normalizedDistance * 5);
 
                 const noiseValue = this.noiseGenerator.simplex3(x * noiseScale, y * noiseScale, 0.5);
-                const value = (noiseValue + 1) * 0.5; // Normalise entre 0 et 1
+                const value = (noiseValue + 1) * 0.5;
                 const colorValue = Math.floor(value * 255 * pulseEffect);
 
                 const index = (x + y * size) * 4;
-                data[index] = Math.min(colorValue * 0.7 + 80, 255);  // R
-                data[index + 1] = Math.min(colorValue * 0.5 + 20, 255); // G
-                data[index + 2] = Math.min(colorValue * 0.9, 255); // B
-                data[index + 3] = 255; // Opaque
+                data[index] = Math.min(colorValue * 0.7 + 80, 255);
+                data[index + 1] = Math.min(colorValue * 0.5 + 20, 255);
+                data[index + 2] = Math.min(colorValue * 0.9, 255);
+                data[index + 3] = 255;
             }
         }
 
-        this.noiseTexture.image.data.set(data); // Mettre à jour les données de la texture
-        this.noiseTexture.needsUpdate = true; // Marque la texture pour mise à jour
+        this.noiseTexture.image.data.set(data);
+        this.noiseTexture.needsUpdate = true;
     }
 
     render() {

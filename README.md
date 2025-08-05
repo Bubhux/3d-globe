@@ -114,7 +114,7 @@ import mapTextureClouds from '~/components/globe/textures/clouds.jpg';
 ### Accès à la démonstration en ligne   
 
 - Vous pouvez accéder à une démonstration de l'application via **Cloudflare**.   
-- En utilisant le lien suivant ➔ [Lien de l'application en ligne](https://globe-7xi.pages.dev/)   
+- En utilisant le lien suivant ➔ [Lien de l'application en ligne](https://9d86095e.globe-7xi.pages.dev/)   
 
 --------------------------------------------------------------------------------------------------------------------------------
 
