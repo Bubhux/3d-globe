@@ -25,7 +25,7 @@
 
 ### Projet globe 3D
 
-- Développement d'un globe 3D interactif sous la forme d'un compposant pour être utiliser dans **React**.    
+- Développement d'un globe 3D interactif sous la forme d'un composant pour être utiliser dans **React**.    
 
 - Utilisation de **React**, **Vite.js** et **Remix**.   
 - Utilisation de **Three.js** et de **Tailwind CSS**.   

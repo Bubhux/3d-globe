@@ -1,4 +1,4 @@
-// app/components/globe/shaders.js
+// app/components/globe/utils/shaders.js
 
 export const shaders = {
 	atmosphere: {},
